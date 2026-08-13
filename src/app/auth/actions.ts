@@ -29,18 +29,27 @@ export async function loginWithEmail(
     return { error: 'Please enter both email address and password.' };
   }
 
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-  if (error) {
-    return { error: error.message || 'Invalid login credentials.' };
+    if (error) {
+      return { error: error.message || 'Invalid email address or password.' };
+    }
+
+    revalidatePath('/', 'layout');
+  } catch (err: any) {
+    if (err?.digest?.startsWith('NEXT_REDIRECT') || err?.message === 'NEXT_REDIRECT') {
+      throw err;
+    }
+    console.error('Exception during loginWithEmail:', err);
+    return { error: err?.message || 'An unexpected error occurred during authentication.' };
   }
 
-  revalidatePath('/', 'layout');
   redirect('/admin/dashboard');
 }
 
@@ -70,62 +79,87 @@ export async function signUpWithEmail(
     return { error: 'Password must be at least 6 characters long.' };
   }
 
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name: fullName,
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
       },
-    },
-  });
+    });
 
-  if (error) {
-    return { error: error.message || 'Failed to create account.' };
+    if (error) {
+      return { error: error.message || 'Failed to create account.' };
+    }
+
+    if (data?.user) {
+      try {
+        await (supabase.from('profiles') as any)
+          .update({ role, full_name: fullName })
+          .eq('id', data.user.id);
+      } catch (profileErr) {
+        console.error('Profile role assignment warning:', profileErr);
+      }
+    }
+
+    revalidatePath('/', 'layout');
+  } catch (err: any) {
+    if (err?.digest?.startsWith('NEXT_REDIRECT') || err?.message === 'NEXT_REDIRECT') {
+      throw err;
+    }
+    console.error('Exception during signUpWithEmail:', err);
+    return { error: err?.message || 'An unexpected error occurred during account creation.' };
   }
 
-  if (data.user) {
-    // Ensure profile role is assigned as 'owner' or selected role
-    await (supabase.from('profiles') as any)
-      .update({ role, full_name: fullName })
-      .eq('id', data.user.id);
-  }
-
-  revalidatePath('/', 'layout');
   redirect('/admin/dashboard');
 }
 
 export async function loginWithGoogle() {
-  const headersList = await headers();
-  const host = headersList.get('host') || 'localhost:3000';
-  const protocol = headersList.get('x-forwarded-proto') || 'http';
-  const origin = `${protocol}://${host}`;
+  try {
+    const headersList = await headers();
+    const host = headersList.get('host') || 'localhost:3000';
+    const protocol = headersList.get('x-forwarded-proto') || 'http';
+    const origin = `${protocol}://${host}`;
 
-  const supabase = await createClient();
+    const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `${origin}/auth/callback`,
-    },
-  });
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${origin}/auth/callback`,
+      },
+    });
 
-  if (error) {
-    return { error: error.message };
+    if (error) {
+      return { error: error.message };
+    }
+
+    if (data?.url) {
+      redirect(data.url);
+    }
+
+    return { error: 'Failed to initiate Google authentication.' };
+  } catch (err: any) {
+    if (err?.digest?.startsWith('NEXT_REDIRECT') || err?.message === 'NEXT_REDIRECT') {
+      throw err;
+    }
+    console.error('Exception during loginWithGoogle:', err);
+    return { error: err?.message || 'Failed to initiate Google authentication.' };
   }
-
-  if (data?.url) {
-    redirect(data.url);
-  }
-
-  return { error: 'Failed to initiate Google authentication.' };
 }
 
 export async function signOut() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  revalidatePath('/', 'layout');
+  try {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+    revalidatePath('/', 'layout');
+  } catch (err: any) {
+    console.error('Exception during signOut:', err);
+  }
+
   redirect('/auth/login');
 }
