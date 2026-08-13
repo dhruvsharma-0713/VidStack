@@ -47,6 +47,14 @@ export async function loginWithEmail(
       throw err;
     }
     console.error('Exception during loginWithEmail:', err);
+
+    if (err?.message?.includes('supabaseUrl') || err?.message?.includes('NEXT_PUBLIC_SUPABASE_URL')) {
+      return {
+        error:
+          'Server Configuration Error: Missing or invalid NEXT_PUBLIC_SUPABASE_URL in environment settings.',
+      };
+    }
+
     return { error: err?.message || 'An unexpected error occurred during authentication.' };
   }
 
@@ -83,6 +91,14 @@ export async function loginWithGoogle() {
       throw err;
     }
     console.error('Exception during loginWithGoogle:', err);
+
+    if (err?.message?.includes('supabaseUrl') || err?.message?.includes('NEXT_PUBLIC_SUPABASE_URL')) {
+      return {
+        error:
+          'Server Configuration Error: Missing or invalid NEXT_PUBLIC_SUPABASE_URL in environment settings.',
+      };
+    }
+
     return { error: err?.message || 'Failed to initiate Google authentication.' };
   }
 }
