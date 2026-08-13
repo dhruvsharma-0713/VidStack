@@ -16,7 +16,7 @@ export default async function ChannelsPage({ searchParams }: ChannelsPageProps) 
   const profile = await getAdminProfile();
 
   if (!profile) {
-    redirect('/auth/login');
+    redirect('/studio-access');
   }
 
   const channels = await getChannelsForUser();

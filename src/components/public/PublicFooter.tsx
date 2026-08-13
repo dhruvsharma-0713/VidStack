@@ -18,9 +18,8 @@ export function PublicFooter() {
         </p>
 
         <div className="flex items-center space-x-6 text-xs text-slate-400 font-medium">
-          <Link href="/showcase" className="hover:text-slate-200 transition">Showcase</Link>
-          <Link href="/blog" className="hover:text-slate-200 transition">Blog</Link>
-          <Link href="/auth/login" className="hover:text-indigo-400 transition">Studio Login</Link>
+          <Link href="/" className="hover:text-slate-200 transition">Showcase</Link>
+          <Link href="/#channels" className="hover:text-slate-200 transition">Network Channels</Link>
         </div>
       </div>
     </footer>

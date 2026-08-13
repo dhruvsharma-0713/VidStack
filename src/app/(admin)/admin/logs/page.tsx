@@ -11,7 +11,7 @@ export default async function LogsPage() {
   const profile = await getAdminProfile();
 
   if (!profile) {
-    redirect('/auth/login');
+    redirect('/studio-access');
   }
 
   const { logs, totalCount } = await getSystemLogs({ limit: 100 });

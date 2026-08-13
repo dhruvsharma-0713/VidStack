@@ -10,7 +10,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const profile = await getAdminProfile();
 
   if (!profile) {
-    redirect('/auth/login');
+    redirect('/studio-access');
   }
 
   return (

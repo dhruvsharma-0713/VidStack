@@ -11,13 +11,13 @@ export default async function VideosPage() {
   const profile = await getAdminProfile();
 
   if (!profile) {
-    redirect('/auth/login');
+    redirect('/studio-access');
   }
 
   const channels = await getChannelsForUser();
 
   const supabase = await createClient();
-  const { data: videos, error } = await (supabase.from('videos') as any)
+  const { data: videos } = await (supabase.from('videos') as any)
     .select('*, channels(title, thumbnail_url)')
     .order('created_at', { ascending: false });
 

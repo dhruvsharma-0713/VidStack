@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Video, Shield, ArrowRight } from 'lucide-react';
+import { Video } from 'lucide-react';
 
 export function PublicNavbar() {
   return (
@@ -21,20 +21,9 @@ export function PublicNavbar() {
 
         {/* Navigation Links */}
         <nav className="hidden md:flex items-center space-x-8 text-xs font-semibold text-slate-400">
-          <Link href="/showcase" className="hover:text-slate-100 transition">Showcase</Link>
-          <Link href="/showcase#channels" className="hover:text-slate-100 transition">Network Channels</Link>
-          <Link href="/blog" className="hover:text-slate-100 transition">Daily Log</Link>
+          <Link href="/" className="hover:text-slate-100 transition">Showcase</Link>
+          <Link href="/#channels" className="hover:text-slate-100 transition">Network Channels</Link>
         </nav>
-
-        {/* Action CTA */}
-        <div className="flex items-center space-x-4">
-          <Link
-            href="/auth/login"
-            className="inline-flex items-center px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-500 transition shadow-md shadow-indigo-600/20"
-          >
-            <Shield className="w-3.5 h-3.5 mr-1.5" /> Enter Studio <ArrowRight className="w-3.5 h-3.5 ml-1" />
-          </Link>
-        </div>
       </div>
     </header>
   );

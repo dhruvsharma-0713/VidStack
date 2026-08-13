@@ -14,7 +14,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
   const profile = await getAdminProfile();
 
   if (!profile) {
-    redirect('/auth/login');
+    redirect('/studio-access');
   }
 
   const { id } = await params;

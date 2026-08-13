@@ -1,6 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
-import { Sparkles, Video, Tv, Cpu, ArrowRight } from 'lucide-react';
+import { Sparkles, Video, Tv, Cpu } from 'lucide-react';
 import { getPublicStats } from '@/lib/public/get-public-data';
 
 export async function HeroSection() {
@@ -31,24 +30,8 @@ export async function HeroSection() {
           VidStack orchestrates script creation, video rendering, OAuth token management, and YouTube publishing across high-growth content channels.
         </p>
 
-        {/* CTA Buttons */}
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            href="/auth/login"
-            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/25"
-          >
-            Access Studio Operations <ArrowRight className="w-4 h-4 ml-2" />
-          </Link>
-          <Link
-            href="/showcase"
-            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 font-semibold text-sm hover:bg-slate-800/80 hover:text-white transition"
-          >
-            Explore Live Showcase
-          </Link>
-        </div>
-
         {/* Live Counter Grid */}
-        <div className="pt-10 grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-3xl mx-auto text-left">
+        <div className="pt-8 grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-3xl mx-auto text-left">
           <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-5 space-y-2 shadow-md">
             <div className="flex items-center justify-between text-slate-400">
               <span className="text-xs font-semibold text-slate-400">Published Videos</span>

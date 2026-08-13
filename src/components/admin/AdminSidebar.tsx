@@ -104,10 +104,10 @@ export function AdminSidebar({ profile }: AdminSidebarProps) {
               'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider',
               isOwner
                 ? 'bg-amber-950 text-amber-400 border border-amber-800/60'
-                : 'bg-indigo-950 text-indigo-400 border border-indigo-800/60'
+                : 'bg-sky-950 text-sky-400 border border-sky-800/60'
             )}
           >
-            {isOwner ? 'Owner' : 'Partner'}
+            {isOwner ? 'Owner' : 'Manager'}
           </span>
         </div>
       </div>

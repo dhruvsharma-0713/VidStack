@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.redirect(`${origin}/auth/login?error=unauthenticated`);
+      return NextResponse.redirect(`${origin}/studio-access?error=unauthenticated`);
     }
 
     // 2. Verify Owner permissions
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
       .eq('id', user.id)
       .single();
 
-    const role = (profile as { role?: string } | null)?.role ?? 'partner';
+    const role = (profile as { role?: string } | null)?.role ?? 'manager';
 
     if (role !== 'owner') {
       return NextResponse.redirect(`${origin}/admin/channels?error=owner_required_for_oauth`);

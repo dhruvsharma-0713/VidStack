@@ -26,8 +26,8 @@ export async function getAdminProfile(): Promise<Profile | null> {
         id: user.id,
         email: user.email || '',
         full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Studio User',
-        role: 'partner',
-        equity_share: 10.00,
+        role: 'manager',
+        equity_share: 10.0,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };

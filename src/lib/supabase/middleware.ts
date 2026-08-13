@@ -45,8 +45,8 @@ export async function updateSession(request: NextRequest) {
 
     const pathname = request.nextUrl.pathname;
 
-    // 1. Auth routes check (/auth/login)
-    if (pathname.startsWith('/auth/login') || pathname === '/auth') {
+    // 1. Stealth Login routes check (/studio-access & legacy /auth/login)
+    if (pathname.startsWith('/studio-access') || pathname.startsWith('/auth/login') || pathname === '/auth') {
       if (user) {
         const url = request.nextUrl.clone();
         url.pathname = '/admin/dashboard';
@@ -57,10 +57,10 @@ export async function updateSession(request: NextRequest) {
 
     // 2. Admin Studio routes check (/admin/*)
     if (pathname.startsWith('/admin')) {
-      // Unauthenticated users redirect to login
+      // Unauthenticated users redirect to stealth login route
       if (!user) {
         const url = request.nextUrl.clone();
-        url.pathname = '/auth/login';
+        url.pathname = '/studio-access';
         url.searchParams.set('redirectTo', pathname);
         return NextResponse.redirect(url);
       }
@@ -77,7 +77,7 @@ export async function updateSession(request: NextRequest) {
           .single();
 
         const typedProfile = profile as { role: UserRole } | null;
-        const userRole = (!error && typedProfile) ? typedProfile.role : 'partner';
+        const userRole = (!error && typedProfile) ? typedProfile.role : 'manager';
 
         if (userRole !== 'owner') {
           const url = request.nextUrl.clone();

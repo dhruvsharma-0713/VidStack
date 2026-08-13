@@ -1,4 +1,4 @@
-export type UserRole = 'owner' | 'partner';
+export type UserRole = 'owner' | 'manager';
 export type VideoStatus = 'draft' | 'generating' | 'rendered' | 'published' | 'failed';
 export type JobStatus = 'queued' | 'processing' | 'completed' | 'failed';
 export type LogLevel = 'info' | 'warn' | 'error';

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useTransition } from 'react';
-import { LogOut, ShieldCheck, UserCheck, Sparkles } from 'lucide-react';
+import { LogOut, ShieldCheck, UserCheck } from 'lucide-react';
 import { Profile } from '@/types/database';
 import { signOut } from '@/app/auth/actions';
 
@@ -21,7 +21,6 @@ export function AdminHeader({ profile }: AdminHeaderProps) {
   const isOwner = profile?.role === 'owner';
   const fullName = profile?.full_name || 'Studio Member';
   const email = profile?.email || '';
-  const equityShare = profile?.equity_share ?? 10.00;
 
   return (
     <header className="h-16 border-b border-slate-800 bg-slate-950/80 backdrop-blur px-6 flex items-center justify-between shrink-0">
@@ -31,7 +30,7 @@ export function AdminHeader({ profile }: AdminHeaderProps) {
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="font-semibold text-slate-200">VidStack v1.0</span>
           <span className="text-slate-500">•</span>
-          <span className="text-slate-400 font-mono text-[11px]">Production</span>
+          <span className="text-slate-400 font-mono text-[11px]">Operational Studio</span>
         </div>
       </div>
 
@@ -42,12 +41,12 @@ export function AdminHeader({ profile }: AdminHeaderProps) {
           {isOwner ? (
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-950/80 text-amber-300 border border-amber-800/80 shadow-sm">
               <ShieldCheck className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
-              OWNER
+              OWNER (FULL ACCESS)
             </span>
           ) : (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-950/80 text-indigo-300 border border-indigo-800/80 shadow-sm">
-              <UserCheck className="w-3.5 h-3.5 mr-1.5 text-indigo-400" />
-              EQUITY PARTNER ({equityShare}%)
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-sky-950/80 text-sky-300 border border-sky-800/80 shadow-sm">
+              <UserCheck className="w-3.5 h-3.5 mr-1.5 text-sky-400" />
+              MANAGER
             </span>
           )}
 

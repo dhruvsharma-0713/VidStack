@@ -21,7 +21,7 @@ export async function initiateYouTubeConnect(): Promise<{ url?: string; error?: 
       .eq('id', user.id)
       .single();
 
-    const role = (profile as { role?: string } | null)?.role ?? 'partner';
+    const role = (profile as { role?: string } | null)?.role ?? 'manager';
 
     if (role !== 'owner') {
       return { error: 'Only Owners can connect or manage YouTube channels.' };

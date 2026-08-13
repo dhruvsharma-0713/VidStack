@@ -53,71 +53,6 @@ export async function loginWithEmail(
   redirect('/admin/dashboard');
 }
 
-export async function signUpWithEmail(
-  prevStateOrFormData: AuthState | FormData | null,
-  formDataParam?: FormData
-): Promise<AuthState> {
-  let formData: FormData;
-  if (prevStateOrFormData instanceof FormData) {
-    formData = prevStateOrFormData;
-  } else if (formDataParam instanceof FormData) {
-    formData = formDataParam;
-  } else {
-    return { error: 'Invalid form submission.' };
-  }
-
-  const email = (formData.get('email') as string)?.trim();
-  const password = formData.get('password') as string;
-  const fullName = (formData.get('fullName') as string)?.trim() || 'Studio Owner';
-  const role = (formData.get('role') as string) || 'owner';
-
-  if (!email || !password) {
-    return { error: 'Please enter both email address and password.' };
-  }
-
-  if (password.length < 6) {
-    return { error: 'Password must be at least 6 characters long.' };
-  }
-
-  try {
-    const supabase = await createClient();
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-      },
-    });
-
-    if (error) {
-      return { error: error.message || 'Failed to create account.' };
-    }
-
-    if (data?.user) {
-      try {
-        await (supabase.from('profiles') as any)
-          .update({ role, full_name: fullName })
-          .eq('id', data.user.id);
-      } catch (profileErr) {
-        console.error('Profile role assignment warning:', profileErr);
-      }
-    }
-
-    revalidatePath('/', 'layout');
-  } catch (err: any) {
-    if (err?.digest?.startsWith('NEXT_REDIRECT') || err?.message === 'NEXT_REDIRECT') {
-      throw err;
-    }
-    console.error('Exception during signUpWithEmail:', err);
-    return { error: err?.message || 'An unexpected error occurred during account creation.' };
-  }
-
-  redirect('/admin/dashboard');
-}
-
 export async function loginWithGoogle() {
   try {
     const headersList = await headers();
@@ -161,5 +96,5 @@ export async function signOut() {
     console.error('Exception during signOut:', err);
   }
 
-  redirect('/auth/login');
+  redirect('/studio-access');
 }
