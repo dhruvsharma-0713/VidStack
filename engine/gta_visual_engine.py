@@ -10,16 +10,24 @@ from PIL import Image, ImageDraw, ImageFont
 from engine.gta_script_architect import GTAVideoScript, GTAScriptScene
 
 # Base paths
-BASE_DIR = Path(__file__).parent.parent
-DATA_DIR = Path(__file__).parent / "data"
-FOOTAGE_DIR = DATA_DIR / "gta_footage"
-OUTPUT_DIR = Path(__file__).parent / "output"
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = Path(__file__).resolve().parent / "data"
+
+if os.getenv("VERCEL"):
+    OUTPUT_DIR = Path("/tmp/engine_output")
+    FOOTAGE_DIR = Path("/tmp/gta_footage")
+else:
+    OUTPUT_DIR = Path(__file__).resolve().parent / "output"
+    FOOTAGE_DIR = DATA_DIR / "gta_footage"
+
 SUBTITLES_DIR = OUTPUT_DIR / "gta_subtitles"
 AUDIO_DIR = OUTPUT_DIR / "gta_audio"
 
-FOOTAGE_DIR.mkdir(parents=True, exist_ok=True)
-SUBTITLES_DIR.mkdir(parents=True, exist_ok=True)
-AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+for p in [FOOTAGE_DIR, OUTPUT_DIR, SUBTITLES_DIR, AUDIO_DIR]:
+    try:
+        p.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        pass
 
 
 class GTAGameplayManager:

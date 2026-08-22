@@ -17,8 +17,15 @@ class SubtitleBurner:
     HEIGHT = 1920
 
     def __init__(self, output_dir: Optional[Path] = None):
-        self.output_dir = output_dir or Path(__file__).parent / "output" / "subtitles"
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+        import os
+        if os.getenv("VERCEL"):
+            self.output_dir = output_dir or Path("/tmp/engine_output/subtitles")
+        else:
+            self.output_dir = output_dir or Path(__file__).resolve().parent / "output" / "subtitles"
+        try:
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
         self.font_path = self._locate_font()
 
     def _locate_font(self) -> str:

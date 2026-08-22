@@ -25,10 +25,18 @@ class GitaAudioSynthesizer:
     VOICE_HINDI = "hi-IN-MadhurNeural"
 
     def __init__(self, output_dir: Optional[Path] = None):
-        self.output_dir = output_dir or Path(__file__).parent / "output" / "audio"
-        self.assets_dir = Path(__file__).parent / "data" / "audio_assets"
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.assets_dir.mkdir(parents=True, exist_ok=True)
+        import os
+        if os.getenv("VERCEL"):
+            self.output_dir = output_dir or Path("/tmp/engine_output/audio")
+            self.assets_dir = Path("/tmp/audio_assets")
+        else:
+            self.output_dir = output_dir or Path(__file__).resolve().parent / "output" / "audio"
+            self.assets_dir = Path(__file__).resolve().parent / "data" / "audio_assets"
+        try:
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+            self.assets_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
 
     async def _synthesize_scene(self, text: str, output_path: Path) -> None:
         communicate = edge_tts.Communicate(text=text, voice=self.VOICE_HINDI, rate="+0%")

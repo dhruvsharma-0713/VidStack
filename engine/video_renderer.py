@@ -39,11 +39,24 @@ class GitaVideoRenderer:
     FPS = 30
 
     def __init__(self, output_dir: Optional[Path] = None):
-        self.output_dir = output_dir or Path(__file__).parent / "output"
+        if os.getenv("VERCEL"):
+            self.output_dir = output_dir or Path("/tmp/engine_output")
+        else:
+            self.output_dir = output_dir or Path(__file__).resolve().parent / "output"
         self.temp_dir = self.output_dir / "temp_render"
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.temp_dir.mkdir(parents=True, exist_ok=True)
-        self.ffmpeg_bin = shutil.which("ffmpeg") or "ffmpeg"
+        try:
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+            self.temp_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
+        self._ffmpeg_bin: Optional[str] = None
+
+    @property
+    def ffmpeg_bin(self) -> str:
+        """Lazy-loads and checks for ffmpeg binary on demand."""
+        if not self._ffmpeg_bin:
+            self._ffmpeg_bin = shutil.which("ffmpeg") or "ffmpeg"
+        return self._ffmpeg_bin
 
     def _prepare_scene_cards(self, bg_paths: list[str], sub_paths: list[str]) -> list[Path]:
         """Pre-composites background images with subtitle overlays into scene cards."""
