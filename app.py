@@ -342,115 +342,124 @@ async def render_video_api(channel_slug: str, payload: GenerateVideoRequest):
     ch_name = channel["name"] if channel else slug.capitalize()
     is_gaming = (channel and channel.get("engine_type") == "gameplay_broll") or slug == "gtachronicles"
 
-    if is_gaming:
-        # GTA Chronicles / Gameplay Pipeline
-        gta_architect = GTAScriptArchitect()
-        voice_id = channel.get("voice_id", "hi-IN-MadhurNeural") if channel else "hi-IN-MadhurNeural"
+    try:
+        if is_gaming:
+            # GTA Chronicles / Gameplay Pipeline
+            gta_architect = GTAScriptArchitect()
+            voice_id = channel.get("voice_id", "hi-IN-MadhurNeural") if channel else "hi-IN-MadhurNeural"
 
-        if payload.scenes and len(payload.scenes) > 0:
-            gta_scenes = [
-                GTAScriptScene(
-                    scene_number=s.scene_number,
-                    duration_seconds=s.duration_seconds,
-                    spoken_hindi=s.spoken_hindi,
-                    visual_description=s.visual_description or "",
-                    energy_level="high"
+            if payload.scenes and len(payload.scenes) > 0:
+                gta_scenes = [
+                    GTAScriptScene(
+                        scene_number=s.scene_number,
+                        duration_seconds=s.duration_seconds,
+                        spoken_hindi=s.spoken_hindi,
+                        visual_description=s.visual_description or "",
+                        energy_level="high"
+                    )
+                    for s in payload.scenes
+                ]
+                script = GTAVideoScript(
+                    title_hindi=payload.draft_text or f"{ch_name} Video",
+                    youtube_tags=["#GTA5", "#GamingShorts", f"#{slug.capitalize()}"],
+                    scenes=gta_scenes,
+                    total_estimated_duration=sum(s.duration_seconds for s in gta_scenes)
                 )
-                for s in payload.scenes
-            ]
-            script = GTAVideoScript(
-                title_hindi=payload.draft_text or f"{ch_name} Video",
-                youtube_tags=["#GTA5", "#GamingShorts", f"#{slug.capitalize()}"],
-                scenes=gta_scenes,
-                total_estimated_duration=sum(s.duration_seconds for s in gta_scenes)
-            )
-        elif payload.draft_text:
-            script = gta_architect.refine_gaming_draft(payload.draft_text)
+            elif payload.draft_text:
+                script = gta_architect.refine_gaming_draft(payload.draft_text)
+            else:
+                script = gta_architect.refine_gaming_draft("GTA 5 me sabse unchi jump")
+
+            gta_renderer = GTAGameplayRenderer(output_dir=OUTPUT_DIR)
+            render_result = await gta_renderer.render_video(script, voice_id=voice_id)
+
+            filename = render_result["filename"]
+            video_path = render_result["video_path"]
+            duration = render_result["duration_seconds"]
+            file_size_mb = render_result["file_size_mb"]
+            stream_url = render_result["stream_url"]
+            title = script.title_hindi
         else:
-            script = gta_architect.refine_gaming_draft("GTA 5 me sabse unchi jump")
+            # Geetaverse / Vedic Script & Video Pipeline
+            architect = GitaScriptArchitect()
 
-        gta_renderer = GTAGameplayRenderer(output_dir=OUTPUT_DIR)
-        render_result = await gta_renderer.render_video(script, voice_id=voice_id)
-
-        filename = render_result["filename"]
-        video_path = render_result["video_path"]
-        duration = render_result["duration_seconds"]
-        file_size_mb = render_result["file_size_mb"]
-        stream_url = render_result["stream_url"]
-        title = script.title_hindi
-    else:
-        # Geetaverse / Vedic Script & Video Pipeline
-        architect = GitaScriptArchitect()
-
-        if payload.scenes and len(payload.scenes) > 0:
-            script_scenes = [
-                ScriptScene(
-                    scene_number=s.scene_number,
-                    duration_seconds=s.duration_seconds,
-                    spoken_hindi=s.spoken_hindi,
-                    visual_description=s.visual_description or "",
-                    bgm_mood=s.bgm_mood or "peaceful"
+            if payload.scenes and len(payload.scenes) > 0:
+                script_scenes = [
+                    ScriptScene(
+                        scene_number=s.scene_number,
+                        duration_seconds=s.duration_seconds,
+                        spoken_hindi=s.spoken_hindi,
+                        visual_description=s.visual_description or "",
+                        bgm_mood=s.bgm_mood or "peaceful"
+                    )
+                    for s in payload.scenes
+                ]
+                script = GitaVideoScript(
+                    chapter=payload.chapter or 2,
+                    verse=payload.verse or 63,
+                    title_hindi=payload.draft_text or f"{ch_name} Video",
+                    youtube_tags=["#Shorts", f"#{slug.capitalize()}"],
+                    scenes=script_scenes,
+                    total_estimated_duration=sum(s.duration_seconds for s in script_scenes)
                 )
-                for s in payload.scenes
-            ]
-            script = GitaVideoScript(
-                chapter=payload.chapter or 2,
-                verse=payload.verse or 63,
-                title_hindi=payload.draft_text or f"{ch_name} Video",
-                youtube_tags=["#Shorts", f"#{slug.capitalize()}"],
-                scenes=script_scenes,
-                total_estimated_duration=sum(s.duration_seconds for s in script_scenes)
-            )
-        elif payload.draft_text:
-            script = architect.refine_operator_draft(payload.draft_text)
-        elif payload.chapter and payload.verse:
-            loader = GitaDatasetManager()
-            verse_data = loader.get_verse(payload.chapter, payload.verse)
-            script = architect.generate_script(verse_data)
-        else:
-            script = architect.refine_operator_draft("gusse aur overthinking se kaise bache")
+            elif payload.draft_text:
+                script = architect.refine_operator_draft(payload.draft_text)
+            elif payload.chapter and payload.verse:
+                loader = GitaDatasetManager()
+                verse_data = loader.get_verse(payload.chapter, payload.verse)
+                script = architect.generate_script(verse_data)
+            else:
+                script = architect.refine_operator_draft("gusse aur overthinking se kaise bache")
 
-        synthesizer = GitaAudioSynthesizer(output_dir=OUTPUT_DIR / "audio")
-        audio_meta = await synthesizer.generate_voiceover(script)
+            synthesizer = GitaAudioSynthesizer(output_dir=OUTPUT_DIR / "audio")
+            audio_meta = await synthesizer.generate_voiceover(script)
 
-        visual_mgr = LittleKrishnaVisualManager()
-        bg_paths = visual_mgr.prepare_all_scenes()
+            visual_mgr = LittleKrishnaVisualManager()
+            bg_paths = visual_mgr.prepare_all_scenes()
 
-        burner = SubtitleBurner(output_dir=OUTPUT_DIR / "subtitles")
-        sub_paths = burner.generate_all_subtitles(script)
+            burner = SubtitleBurner(output_dir=OUTPUT_DIR / "subtitles")
+            sub_paths = burner.generate_all_subtitles(script)
 
-        renderer = GitaVideoRenderer(output_dir=OUTPUT_DIR)
-        gita_render_result = renderer.assemble_video(script, audio_meta, bg_paths, sub_paths)
+            renderer = GitaVideoRenderer(output_dir=OUTPUT_DIR)
+            gita_render_result = renderer.assemble_video(script, audio_meta, bg_paths, sub_paths)
 
-        filename = Path(gita_render_result.video_path).name
-        video_path = gita_render_result.video_path
-        duration = gita_render_result.duration_seconds
-        file_size_mb = round(gita_render_result.file_size_bytes / (1024 * 1024), 2)
-        stream_url = f"/static/output/{filename}"
-        title = script.title_hindi
+            filename = Path(gita_render_result.video_path).name
+            video_path = gita_render_result.video_path
+            duration = gita_render_result.duration_seconds
+            file_size_mb = round(gita_render_result.file_size_bytes / (1024 * 1024), 2)
+            stream_url = f"/static/output/{filename}"
+            title = script.title_hindi
 
-    # Persist to SQLite Database
-    video_id = save_video_record(
-        channel_slug=slug,
-        title=title,
-        draft_text=payload.draft_text or title,
-        script_json=script.model_dump(),
-        video_path=video_path,
-        duration=duration,
-        status="rendered"
-    )
+        # Persist to SQLite Database
+        video_id = save_video_record(
+            channel_slug=slug,
+            title=title,
+            draft_text=payload.draft_text or title,
+            script_json=script.model_dump(),
+            video_path=video_path,
+            duration=duration,
+            status="rendered"
+        )
 
-    return {
-        "status": "success",
-        "video_id": video_id,
-        "video_path": video_path,
-        "filename": filename,
-        "title": title,
-        "stream_url": stream_url,
-        "duration_seconds": duration,
-        "resolution": "1080x1920",
-        "file_size_mb": file_size_mb
-    }
+        return {
+            "status": "success",
+            "video_id": video_id,
+            "video_path": video_path,
+            "filename": filename,
+            "title": title,
+            "stream_url": stream_url,
+            "duration_seconds": duration,
+            "resolution": "1080x1920",
+            "file_size_mb": file_size_mb
+        }
+    except Exception as e:
+        import traceback
+        trace = traceback.format_exc()
+        print(f"[!] Video render error for channel '{slug}':\n{trace}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Video Render Failed: {str(e)}"
+        )
 
 
 @app.post("/api/{channel_slug}/schedule")

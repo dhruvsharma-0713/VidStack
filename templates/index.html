@@ -195,30 +195,59 @@
         </div>
 
         <!-- Showcase / Recent Renders -->
-        {% if recent_videos %}
-        <div>
-            <h2 class="text-2xl font-bold text-white tracking-tight mb-6">Recent Render Showcase</h2>
+        <div class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white tracking-tight">Recent Render Showcase</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">High-retention 9:16 vertical shorts generated across VidStack channels</p>
+                </div>
+            </div>
+
+            {% if recent_videos and recent_videos|length > 0 %}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for video in recent_videos %}
-                <div class="glass-card rounded-2xl overflow-hidden p-4">
+                <div class="glass-card rounded-2xl overflow-hidden p-4 flex flex-col justify-between">
                     <div class="relative bg-black rounded-xl overflow-hidden mb-3 aspect-[9/16] max-h-96 flex items-center justify-center">
                         <video src="{{ video.stream_url }}" controls preload="metadata" class="w-full h-full object-contain"></video>
                     </div>
-                    <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
-                        <span class="font-medium text-slate-200 truncate max-w-[180px]">{{ video.filename }}</span>
-                        <span class="text-brand-400 font-mono">{{ video.duration_seconds }}s</span>
-                    </div>
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="text-slate-500">{{ video.file_size_mb }} MB</span>
-                        <a href="{{ video.stream_url }}" download class="text-brand-400 hover:text-brand-300 font-medium">
-                            <i class="fa-solid fa-download mr-1"></i> Download
-                        </a>
+                    <div>
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                            <span class="font-medium text-slate-200 truncate max-w-[180px]">{{ video.filename }}</span>
+                            <span class="text-brand-400 font-mono">{{ video.duration_seconds }}s</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-slate-500">{{ video.file_size_mb }} MB</span>
+                            <a href="{{ video.stream_url }}" download class="text-brand-400 hover:text-brand-300 font-medium">
+                                <i class="fa-solid fa-download mr-1"></i> Download
+                            </a>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
+            {% else %}
+            <!-- Elegant Demo / Empty Showcase State -->
+            <div class="glass-card rounded-2xl p-8 border border-slate-800 text-center">
+                <div class="max-w-md mx-auto space-y-4">
+                    <div class="w-16 h-16 rounded-2xl bg-brand-500/10 text-brand-400 border border-brand-500/20 flex items-center justify-center text-2xl mx-auto">
+                        <i class="fa-solid fa-video"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">No Public Renders in Queue</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Log into any active channel studio above to generate your first AI vertical video in under 8 seconds.
+                    </p>
+                    <div class="flex items-center justify-center gap-3 pt-2">
+                        <a href="/geetaverse" class="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-semibold hover:bg-amber-500/30 transition flex items-center gap-2">
+                            <i class="fa-solid fa-om"></i> Geetaverse
+                        </a>
+                        <a href="/gtachronicles" class="px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold hover:bg-emerald-500/30 transition flex items-center gap-2">
+                            <i class="fa-solid fa-gamepad"></i> GTA Chronicles
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
     </main>
 
     <!-- Footer -->

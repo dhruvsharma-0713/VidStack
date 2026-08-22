@@ -216,11 +216,28 @@ class GTAGamingSubtitleBurner:
         return ImageFont.load_default()
 
 
+import shutil
+
+
 class GTAGameplayRenderer:
     """Direct, single-pass hardware-optimized video renderer for GTA Chronicles."""
 
     def __init__(self, output_dir: Path = OUTPUT_DIR):
         self.output_dir = output_dir
+        self._ffmpeg_bin: Optional[str] = None
+
+    @property
+    def ffmpeg_bin(self) -> str:
+        """Lazy-loads and checks for ffmpeg binary on demand, falling back to imageio-ffmpeg."""
+        if not self._ffmpeg_bin:
+            self._ffmpeg_bin = shutil.which("ffmpeg")
+            if not self._ffmpeg_bin:
+                try:
+                    import imageio_ffmpeg
+                    self._ffmpeg_bin = imageio_ffmpeg.get_ffmpeg_exe()
+                except Exception:
+                    self._ffmpeg_bin = "ffmpeg"
+        return self._ffmpeg_bin
 
     async def render_video(self, script: GTAVideoScript, voice_id: str = "hi-IN-MadhurNeural") -> Dict[str, Any]:
         """Synthesizes speech in parallel, pre-composites scene frames, and encodes in under 8 seconds."""
@@ -254,7 +271,7 @@ class GTAGameplayRenderer:
         total_duration = sum(durations)
 
         # 6. Execute Single-Pass FFmpeg Hardware Command
-        cmd = ["ffmpeg", "-y", "-threads", "0", "-filter_complex_threads", "0"]
+        cmd = [self.ffmpeg_bin, "-y", "-threads", "0", "-filter_complex_threads", "0"]
         for comp_path in composite_paths:
             cmd.extend(["-i", str(comp_path.resolve())])
         cmd.extend(["-i", str(master_audio.resolve())])
@@ -347,7 +364,7 @@ class GTAGameplayRenderer:
                 f.write(f"file '{af.resolve()}'\n")
 
         cmd = [
-            "ffmpeg", "-y", "-f", "concat", "-safe", "0",
+            self.ffmpeg_bin, "-y", "-f", "concat", "-safe", "0",
             "-i", str(list_file),
             "-c", "copy",
             str(output_file)

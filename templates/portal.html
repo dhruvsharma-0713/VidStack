@@ -498,7 +498,10 @@
                     })
                 });
 
-                if (!res.ok) throw new Error('Render failed');
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.detail || `Render failed with status ${res.status}`);
+                }
                 const result = await res.json();
 
                 progressBar.style.width = '100%';
@@ -507,9 +510,10 @@
                 lastRenderedVideoId = result.video_id;
                 playVideo(result.stream_url, result.title || result.filename, result.duration_seconds, result.video_id);
                 loadHistory();
+                showToast(`✓ Render complete in ${progressTimer.innerText} (${result.file_size_mb || 0} MB)`, 'success');
 
             } catch (err) {
-                alert('Render failed: ' + err.message);
+                showToast(`Render Failed: ${err.message}`, 'error', 7000);
             } finally {
                 clearInterval(timerInterval);
                 renderBtn.disabled = false;
@@ -541,7 +545,7 @@
             const timeVal = document.getElementById('scheduleTime').value;
             const alertBox = document.getElementById('scheduleAlert');
             if (!timeVal) {
-                alert('Please select a target publishing time.');
+                showToast('Please select a target publishing time.', 'warning');
                 return;
             }
 
@@ -561,21 +565,23 @@
 
                 alertBox.classList.remove('hidden');
                 alertBox.innerText = `✓ Successfully scheduled for ${new Date(timeVal).toLocaleString()}`;
+                showToast(`✓ Video scheduled for ${new Date(timeVal).toLocaleString()}`, 'success');
                 loadHistory();
                 setTimeout(() => { alertBox.classList.add('hidden'); }, 4000);
             } catch (err) {
-                alert('Schedule error: ' + err.message);
+                showToast('Schedule error: ' + err.message, 'error');
             }
         }
 
         async function loadHistory() {
             try {
-                const res = await fetch(`/api/${channelSlug}/history`);
+                const res = await fetch(`/api/${channelSlug}/videos`);
+                if (!res.ok) return;
                 const data = await res.json();
-                const container = document.getElementById('historyList');
+                const container = document.getElementById('historyContainer');
                 container.innerHTML = '';
-                if (!data || data.length === 0) {
-                    container.innerHTML = '<div class="p-4 text-center text-slate-500 text-xs">No videos recorded in database yet.</div>';
+                if (data.length === 0) {
+                    container.innerHTML = '<div class="text-slate-500 text-center py-6 text-xs">No renders in queue. Create one above!</div>';
                     return;
                 }
                 data.forEach(item => {
@@ -648,16 +654,18 @@
                             <span class="font-bold">✓ Published to YouTube Shorts!</span>
                             <div class="text-[11px] text-slate-300 mt-0.5">Video ID: ${data.youtube_video_id}</div>
                         </div>
-                        <a href="${data.shorts_url}" target="_blank" class="px-2.5 py-1 rounded bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition flex items-center gap-1">
+                        <a href="${data.youtube_url}" target="_blank" class="px-2.5 py-1 rounded bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition flex items-center gap-1">
                             <i class="fa-brands fa-youtube"></i> View Short
                         </a>
                     </div>
                 `;
+                showToast('✓ Published to YouTube Shorts!', 'success');
                 loadHistory();
             } catch (err) {
                 alertBox.classList.remove('hidden');
                 alertBox.className = 'p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs';
                 alertBox.innerHTML = `<span><i class="fa-solid fa-triangle-exclamation mr-1"></i> ${err.message}</span>`;
+                showToast(`YouTube Upload Error: ${err.message}`, 'error', 6000);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-brands fa-youtube"></i> YouTube';
@@ -669,7 +677,7 @@
             const alertBox = document.getElementById('instagramAlert');
             
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading Reel...';
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading to Reels...';
             alertBox.classList.add('hidden');
 
             try {
@@ -698,11 +706,13 @@
                         </a>
                     </div>
                 `;
+                showToast('✓ Published to Instagram Reels!', 'success');
                 loadHistory();
             } catch (err) {
                 alertBox.classList.remove('hidden');
                 alertBox.className = 'p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs';
                 alertBox.innerHTML = `<span><i class="fa-solid fa-triangle-exclamation mr-1"></i> ${err.message}</span>`;
+                showToast(`Instagram Publish Error: ${err.message}`, 'error', 6000);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-brands fa-instagram"></i> Instagram';
@@ -717,35 +727,45 @@
         // Check for YouTube & Instagram OAuth return query params
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('youtube_connected') === 'true') {
+            showToast('✓ YouTube Channel connected successfully!', 'success', 6000);
             const alertBox = document.getElementById('youtubeAlert');
             if (alertBox) {
                 alertBox.classList.remove('hidden');
                 alertBox.className = 'p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs';
-                alertBox.innerHTML = '<span><i class="fa-solid fa-circle-check mr-1"></i> YouTube Channel successfully connected!</span>';
+                alertBox.innerHTML = '<span><i class="fa-solid fa-circle-check mr-1"></i> YouTube Channel connected!</span>';
             }
+            window.history.replaceState({}, document.title, window.location.pathname);
         } else if (urlParams.get('youtube_error')) {
+            const err = urlParams.get('youtube_error');
+            showToast(`YouTube Auth Error: ${err}`, 'error', 8000);
             const alertBox = document.getElementById('youtubeAlert');
             if (alertBox) {
                 alertBox.classList.remove('hidden');
                 alertBox.className = 'p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs';
-                alertBox.innerHTML = `<span><i class="fa-solid fa-triangle-exclamation mr-1"></i> YouTube Auth Error: ${urlParams.get('youtube_error')}</span>`;
+                alertBox.innerHTML = `<span><i class="fa-solid fa-triangle-exclamation mr-1"></i> YouTube Auth Error: ${err}</span>`;
             }
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         if (urlParams.get('instagram_connected') === 'true') {
+            showToast('✓ Instagram Business Account connected successfully!', 'success', 6000);
             const alertBox = document.getElementById('instagramAlert');
             if (alertBox) {
                 alertBox.classList.remove('hidden');
                 alertBox.className = 'p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs';
-                alertBox.innerHTML = '<span><i class="fa-solid fa-circle-check mr-1"></i> Instagram Business Account successfully connected!</span>';
+                alertBox.innerHTML = '<span><i class="fa-solid fa-circle-check mr-1"></i> Instagram Business Account connected!</span>';
             }
+            window.history.replaceState({}, document.title, window.location.pathname);
         } else if (urlParams.get('instagram_error')) {
+            const err = urlParams.get('instagram_error');
+            showToast(`Instagram Auth Error: ${err}`, 'error', 8000);
             const alertBox = document.getElementById('instagramAlert');
             if (alertBox) {
                 alertBox.classList.remove('hidden');
                 alertBox.className = 'p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs';
-                alertBox.innerHTML = `<span><i class="fa-solid fa-triangle-exclamation mr-1"></i> Instagram Auth Error: ${urlParams.get('instagram_error')}</span>`;
+                alertBox.innerHTML = `<span><i class="fa-solid fa-triangle-exclamation mr-1"></i> Instagram Auth Error: ${err}</span>`;
             }
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         // Set default schedule time to tomorrow 7:00 PM

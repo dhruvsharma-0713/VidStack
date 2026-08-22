@@ -53,9 +53,15 @@ class GitaVideoRenderer:
 
     @property
     def ffmpeg_bin(self) -> str:
-        """Lazy-loads and checks for ffmpeg binary on demand."""
+        """Lazy-loads and checks for ffmpeg binary on demand, falling back to imageio-ffmpeg."""
         if not self._ffmpeg_bin:
-            self._ffmpeg_bin = shutil.which("ffmpeg") or "ffmpeg"
+            self._ffmpeg_bin = shutil.which("ffmpeg")
+            if not self._ffmpeg_bin:
+                try:
+                    import imageio_ffmpeg
+                    self._ffmpeg_bin = imageio_ffmpeg.get_ffmpeg_exe()
+                except Exception:
+                    self._ffmpeg_bin = "ffmpeg"
         return self._ffmpeg_bin
 
     def _prepare_scene_cards(self, bg_paths: list[str], sub_paths: list[str]) -> list[Path]:
