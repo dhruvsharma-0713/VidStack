@@ -55,13 +55,21 @@ from engine.gita_loader import GitaDatasetManager
 from contextlib import asynccontextmanager
 from engine.scheduler import scheduler
 
-# Ensure SQLite database is initialized
-init_db()
+# Ensure SQLite database is initialized with safe cold-start handling
+try:
+    init_db()
+except Exception as e:
+    print(f"[!] DB init warning: {e}")
 
-# Base directories
+# Base and template directories resolution
 BASE_DIR = Path(__file__).resolve().parent
-OUTPUT_DIR = Path("/tmp/engine_output") if os.getenv("VERCEL") else BASE_DIR / "engine" / "output"
 TEMPLATES_DIR = BASE_DIR / "templates"
+if not TEMPLATES_DIR.exists():
+    TEMPLATES_DIR = Path.cwd() / "templates"
+if not TEMPLATES_DIR.exists():
+    TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
+
+OUTPUT_DIR = Path("/tmp/engine_output") if os.getenv("VERCEL") else BASE_DIR / "engine" / "output"
 
 try:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -103,7 +111,7 @@ app.add_middleware(
 )
 
 # Mount static video output directory
-app.mount("/static/output", StaticFiles(directory=str(OUTPUT_DIR)), name="output")
+app.mount("/static/output", StaticFiles(directory=str(OUTPUT_DIR), check_dir=False), name="output")
 
 # Jinja2 Templates Engine (resolves to absolute templates directory)
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))

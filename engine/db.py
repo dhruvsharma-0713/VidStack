@@ -13,6 +13,10 @@ else:
 
 def get_connection() -> sqlite3.Connection:
     """Returns a connection to the SQLite database with dict row factory."""
+    try:
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        pass
     conn = sqlite3.connect(str(DB_PATH.resolve()), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
