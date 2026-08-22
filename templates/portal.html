@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ channel.name }} | Operator Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 500: '#f59e0b', 600: '#d97706', 700: '#b45309' },
+                        dark: { 800: '#13151f', 850: '#0e1018', 900: '#090a0f' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass-panel {
+            background: rgba(19, 21, 31, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(14, 16, 24, 0.6);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(245, 158, 11, 0.3);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-amber-600 selection:text-white">
+
+    <!-- Top Navigation -->
+    <header class="border-b border-slate-800/80 bg-dark-850/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="/" class="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg text-white text-lg
+                    {% if channel.slug == 'geetaverse' %}
+                        bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/20
+                    {% else %}
+                        bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20
+                    {% endif %}">
+                    <i class="fa-solid fa-{{ 'om' if channel.slug == 'geetaverse' else 'gamepad' }}"></i>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-lg text-white">{{ channel.name }}</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium">
+                            {{ channel.niche }}
+                        </span>
+                    </div>
+                    <span class="text-xs text-slate-400">Authenticated Operator Studio • SQLite Backed</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2.5">
+                {% if channel.youtube_token %}
+                <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium flex items-center gap-1.5">
+                    <i class="fa-brands fa-youtube text-red-500"></i> YouTube
+                </span>
+                {% else %}
+                <a href="/api/auth/youtube/login?channel={{ channel.slug }}" class="text-xs px-2.5 py-1 rounded-full bg-red-600 hover:bg-red-700 text-white font-medium transition flex items-center gap-1 shadow-md shadow-red-600/20">
+                    <i class="fa-brands fa-youtube"></i> +YouTube
+                </a>
+                {% endif %}
+
+                {% if channel.instagram_token %}
+                <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium flex items-center gap-1.5">
+                    <i class="fa-brands fa-instagram text-pink-500"></i> Instagram
+                </span>
+                {% else %}
+                <a href="/api/auth/instagram/login?channel={{ channel.slug }}" class="text-xs px-2.5 py-1 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-medium transition flex items-center gap-1 shadow-md shadow-pink-600/20">
+                    <i class="fa-brands fa-instagram"></i> +Instagram
+                </a>
+                {% endif %}
+
+                <a href="/{{ 'gtachronicles' if channel.slug == 'geetaverse' else 'geetaverse' }}" class="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-arrow-right-arrow-left mr-1"></i> Switch Portal
+                </a>
+                <a href="/core_access" class="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-shield-halved text-brand-400 mr-1"></i> Core Access
+                </a>
+                <button onclick="handleLogout()" class="text-xs text-red-400 hover:text-red-300 px-3 py-1.5 rounded-lg border border-red-500/20 hover:bg-red-500/10 transition">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Studio Layout -->
+    <main class="flex-1 max-w-7xl mx-auto px-6 py-8 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Column: Operator Input & Script Architect (7 Cols) -->
+        <section class="lg:col-span-7 space-y-6">
+            
+            <!-- Draft Input Card -->
+            <div class="glass-panel rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <label class="text-sm font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-pen-nib text-amber-400"></i> Operator Notes & Story Prompt
+                    </label>
+                    <span class="text-xs text-slate-400">{{ 'Hindi / Devanagari' if channel.slug == 'geetaverse' else 'English Narrative' }}</span>
+                </div>
+
+                <textarea id="draftInput" rows="3" class="w-full bg-dark-850 border border-slate-800 rounded-xl p-4 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/60 transition" 
+                    placeholder="{% if channel.slug == 'gtachronicles' or channel.engine_type == 'gameplay_broll' %}e.g. Maze Bank Tower se Rocket Voltic ka impossible jump landing in swimming pool...{% else %}e.g. gusse aur overthinking se kaise bache, mann ko shaant kaise kare...{% endif %}"></textarea>
+                
+                <!-- Quick Preset Chips -->
+                <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                    <span class="text-slate-500 font-medium mr-1">Quick Themes:</span>
+                    {% if channel.slug == 'gtachronicles' or channel.engine_type == 'gameplay_broll' %}
+                    <button onclick="setTheme('GTA 5 me sabse unchi jump')" class="px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-slate-800 border border-slate-800 text-slate-300 transition hover:border-emerald-500/40">
+                        🚗 Impossible Ramp Stunt
+                    </button>
+                    <button onclick="setTheme('Mount Chiliad ka sabse bada raaz')" class="px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-slate-800 border border-slate-800 text-slate-300 transition hover:border-emerald-500/40">
+                        🛸 Mount Chiliad UFO Secret
+                    </button>
+                    <button onclick="setTheme('5-Star police escape secret subway')" class="px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-slate-800 border border-slate-800 text-slate-300 transition hover:border-emerald-500/40">
+                        💰 5-Star Subway Escape
+                    </button>
+                    {% else %}
+                    <button onclick="setTheme('gusse aur overthinking se kaise bache')" class="px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-slate-800 border border-slate-800 text-slate-300 transition hover:border-amber-500/40">
+                        ⚡ गुस्सा और ओवरथिंकिंग
+                    </button>
+                    <button onclick="setTheme('karm karo fal ki chinta mat karo')" class="px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-slate-800 border border-slate-800 text-slate-300 transition hover:border-amber-500/40">
+                        🪷 कर्म और फल
+                    </button>
+                    <button onclick="setTheme('mann ki chanchalta ko kaise roke')" class="px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-slate-800 border border-slate-800 text-slate-300 transition hover:border-amber-500/40">
+                        🧘‍♂️ मन की चंचलता
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- Action Row -->
+                <div class="mt-5 flex items-center justify-between">
+                    <div class="text-xs text-slate-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock text-slate-500"></i> Target: 35-40s 9:16 Short
+                    </div>
+                    <button id="refineBtn" onclick="refineDraft()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm transition flex items-center gap-2 shadow-lg shadow-amber-500/20">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI Refine Script
+                    </button>
+                </div>
+            </div>
+
+            <!-- Script Review & Scene Timeline -->
+            <div class="glass-panel rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-amber-400"></i> 5-Scene Narrative Timeline
+                        </h3>
+                        <p class="text-xs text-slate-400">Review & customize spoken narration per scene</p>
+                    </div>
+                    <span id="scriptDurationBadge" class="text-xs font-mono px-2.5 py-1 rounded-full bg-slate-800 text-amber-300 border border-slate-700">
+                        ~38s Total
+                    </span>
+                </div>
+
+                <!-- Scene Cards Container -->
+                <div id="scenesContainer" class="space-y-3 max-h-[440px] overflow-y-auto pr-1 custom-scrollbar">
+                    {% if channel.slug == 'geetaverse' %}
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-amber-400">Scene 1 • Hook</span>
+                            <span>~7s</span>
+                        </div>
+                        <textarea class="scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-amber-500/50" rows="2">क्या कभी-कभी गुस्सा और लगातार चलने वाले विचार आपके मन का सुकून छीन लेते हैं?</textarea>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-amber-400">Scene 2 • Shlok / Wisdom</span>
+                            <span>~8s</span>
+                        </div>
+                        <textarea class="scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-amber-500/50" rows="2">गीता में श्री कृष्ण कहते हैं—ध्यायतो विषयान्पुंसः... जब हम ज्यादा सोचते हैं, तो मोह और उससे क्रोध जन्म लेता है।</textarea>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-amber-400">Scene 3 • Soulful Meaning</span>
+                            <span>~8s</span>
+                        </div>
+                        <textarea class="scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-amber-500/50" rows="2">क्रोध में हमारी बुद्धि काम करना बंद कर देती है, और हम खुद का ही नुकसान कर बैठते हैं।</textarea>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-amber-400">Scene 4 • Practical Action</span>
+                            <span>~9s</span>
+                        </div>
+                        <textarea class="scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-amber-500/50" rows="2">जब भी मन में अशांति या गुस्सा आए, 2 मिनट गहरी सांस लें और सब कुछ कान्हा को समर्पित कर दें।</textarea>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-amber-400">Scene 5 • Outro & Blessing</span>
+                            <span>~6s</span>
+                        </div>
+                        <textarea class="scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-amber-500/50" rows="2">शांत मन ही सबसे बड़ी शक्ति है। सब अच्छा होगा, प्रेम से बोलिए—राधे-राधे!</textarea>
+                    </div>
+                    {% else %}
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-emerald-400">Scene 1 • High-Stakes Hook</span>
+                            <span>~8s</span>
+                        </div>
+                        <textarea class="scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-emerald-500/50" rows="2">Did you know there is a secret escape tunnel beneath Los Santos that guaranteed a 100% clean getaway in GTA V?</textarea>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-emerald-400">Scene 2 • The Setup</span>
+                            <span>~9s</span>
+                        </div>
+                        <textarea class="scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-emerald-500/50" rows="2">During the Big Score heist, Michael and Trevor discovered an abandoned subway duct right beneath the bank vault.</textarea>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-emerald-400">Scene 3 • Chase & Climax</span>
+                            <span>~10s</span>
+                        </div>
+                        <textarea class="scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-emerald-500/50" rows="2">With 5 stars lighting up the map, diving into this tunnel instantly breaks the police chopper line of sight!</textarea>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-emerald-400">Scene 4 • The Escape</span>
+                            <span>~10s</span>
+                        </div>
+                        <textarea class="scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-emerald-500/50" rows="2">Two hundred million dollars secured, and the FIB didn't even know what hit them.</textarea>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-emerald-400">Scene 5 • CTA</span>
+                            <span>~8s</span>
+                        </div>
+                        <textarea class="scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-emerald-500/50" rows="2">Drop a like if you still play GTA V in 2026, and subscribe for more hidden Los Santos secrets!</textarea>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- 1-Click Render CTA -->
+                <div class="mt-5 pt-4 border-t border-slate-800/80 flex items-center justify-between">
+                    <div>
+                        <div class="text-xs font-semibold text-slate-300">Single-Pass Python Pipeline</div>
+                        <div class="text-[11px] text-slate-500">Audio Synth + PIL Card Overlay + FFmpeg</div>
+                    </div>
+                    <button id="renderBtn" onclick="triggerRender()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-sm transition flex items-center gap-2 shadow-xl shadow-amber-500/25">
+                        <i class="fa-solid fa-play"></i> 1-Click Render Video (&lt;10s)
+                    </button>
+                </div>
+
+                <!-- Progress Indicator -->
+                <div id="renderProgress" class="hidden mt-4 p-4 rounded-xl bg-dark-850 border border-amber-500/30">
+                    <div class="flex items-center justify-between text-xs mb-2">
+                        <span id="progressStep" class="font-medium text-amber-400 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> Rendering video...
+                        </span>
+                        <span id="progressTimer" class="font-mono text-slate-400">0.0s</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <div id="progressBar" class="bg-gradient-to-r from-amber-400 to-orange-500 h-2 rounded-full transition-all duration-300" style="width: 20%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Video Preview, Scheduling & SQLite History (5 Cols) -->
+        <section class="lg:col-span-5 space-y-6">
+            
+            <!-- Video Player Card -->
+            <div class="glass-panel rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-film text-amber-400"></i> Video Preview
+                    </h3>
+                    <span id="videoStatusBadge" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
+                        {{ 'Rendered' if latest_video else 'Ready' }}
+                    </span>
+                </div>
+
+                <!-- 9:16 Vertical Player -->
+                <div class="relative bg-black rounded-xl overflow-hidden aspect-[9/16] max-h-[460px] mx-auto flex items-center justify-center border border-slate-800">
+                    <video id="videoPlayer" src="{{ latest_video.stream_url if latest_video else '' }}" controls preload="metadata" class="w-full h-full object-contain"></video>
+                    <div id="noVideoPlaceholder" class="{{ 'hidden' if latest_video else '' }} absolute inset-0 flex flex-col items-center justify-center text-slate-500 p-6 text-center">
+                        <i class="fa-solid fa-clapperboard text-4xl mb-3 text-slate-600"></i>
+                        <span class="text-xs">No video rendered yet.<br>Click "1-Click Render Video" to generate.</span>
+                    </div>
+                </div>
+
+                <!-- Metadata & Download -->
+                <div id="videoMetaCard" class="mt-4 p-3.5 rounded-xl bg-dark-850 border border-slate-800 flex items-center justify-between text-xs">
+                    <div>
+                        <div id="metaTitle" class="font-medium text-slate-200 truncate max-w-[180px]">
+                            {{ latest_video.title if latest_video else 'Geetaverse Video' }}
+                        </div>
+                        <div id="metaDetails" class="text-slate-500">
+                            {{ latest_video.duration if latest_video else '38.0' }}s • 1080x1920 HD
+                        </div>
+                    </div>
+                    <a id="downloadBtn" href="{{ latest_video.stream_url if latest_video else '#' }}" download class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 font-medium transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> Download
+                    </a>
+                </div>
+            </div>
+
+            <!-- Schedule to Platforms Card -->
+            <div class="glass-panel rounded-2xl p-6">
+                <h3 class="text-base font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-check text-amber-400"></i> Auto-Schedule & Publish
+                </h3>
+
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Target Publishing Time</label>
+                        <input type="datetime-local" id="scheduleTime" class="w-full bg-dark-850 border border-slate-800 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-amber-500/50">
+                    </div>
+
+                    <div class="pt-2 flex items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+                            <input type="checkbox" id="pubYoutube" checked class="accent-amber-500 rounded">
+                            <i class="fa-brands fa-youtube text-red-500"></i> YouTube Shorts
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+                            <input type="checkbox" id="pubInstagram" checked class="accent-amber-500 rounded">
+                            <i class="fa-brands fa-instagram text-pink-500"></i> Instagram Reels
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                        <button onclick="schedulePost()" class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold transition flex items-center justify-center gap-1.5 text-xs">
+                            <i class="fa-solid fa-paper-plane text-amber-400"></i> Schedule
+                        </button>
+                        <button onclick="publishToYouTube()" id="ytPublishBtn" class="py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white font-semibold transition flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/20 text-xs">
+                            <i class="fa-brands fa-youtube"></i> YouTube
+                        </button>
+                        <button onclick="publishToInstagram()" id="igPublishBtn" class="py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-semibold transition flex items-center justify-center gap-1.5 shadow-lg shadow-pink-600/20 text-xs">
+                            <i class="fa-brands fa-instagram"></i> Instagram
+                        </button>
+                    </div>
+                    <div id="scheduleAlert" class="hidden text-center text-emerald-400 font-medium mt-1"></div>
+                    <div id="youtubeAlert" class="hidden p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs"></div>
+                    <div id="instagramAlert" class="hidden p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs"></div>
+                </div>
+            </div>
+
+            <!-- Video History from SQLite Database -->
+            <div class="glass-panel rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> SQLite Video History
+                    </h3>
+                    <button onclick="loadHistory()" class="text-xs text-amber-400 hover:underline">Refresh</button>
+                </div>
+                <div id="historyList" class="space-y-2 max-h-52 overflow-y-auto pr-1 custom-scrollbar text-xs">
+                    {% for vid in history_videos %}
+                    <div class="p-2.5 rounded-lg bg-dark-850 border border-slate-800 flex items-center justify-between">
+                        <div class="truncate max-w-[170px]">
+                            <div class="font-medium text-slate-200 truncate">{{ vid.title or 'Generated Video' }}</div>
+                            <div class="text-[10px] text-slate-500 font-mono">{{ vid.duration }}s • {{ vid.created_at[:16] }}</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded text-[10px] uppercase font-semibold
+                                {% if vid.status == 'scheduled' %}bg-amber-500/20 text-amber-300 border border-amber-500/30
+                                {% elif vid.status == 'published' %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30
+                                {% else %}bg-slate-800 text-slate-400{% endif %}">
+                                {{ vid.status }}
+                            </span>
+                            <button onclick="playVideo('{{ vid.stream_url }}', '{{ vid.title }}', '{{ vid.duration }}', '{{ vid.id }}')" class="text-amber-400 hover:text-amber-300 p-1">
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="p-4 text-center text-slate-500 text-xs">
+                        No videos recorded in database yet.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Client Script -->
+    <script>
+        const channelSlug = "{{ channel.slug }}";
+        let lastRenderedVideoId = "{{ latest_video.id if latest_video else '' }}";
+        let timerInterval = null;
+
+        function setTheme(theme) {
+            document.getElementById('draftInput').value = theme;
+            refineDraft();
+        }
+
+        async function refineDraft() {
+            const draftText = document.getElementById('draftInput').value.trim();
+            if (!draftText) return;
+
+            const refineBtn = document.getElementById('refineBtn');
+            refineBtn.disabled = true;
+            refineBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Refining...';
+
+            try {
+                const res = await fetch(`/api/${channelSlug}/refine`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ draft_text: draftText })
+                });
+
+                if (!res.ok) throw new Error('Refine request failed');
+                const data = await res.json();
+                renderSceneCards(data.scenes);
+                document.getElementById('scriptDurationBadge').innerText = `~${data.total_estimated_duration || 38}s Total`;
+            } catch (err) {
+                alert('Script refinement error: ' + err.message);
+            } finally {
+                refineBtn.disabled = false;
+                refineBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> AI Refine Script';
+            }
+        }
+
+        function renderSceneCards(scenes) {
+            const container = document.getElementById('scenesContainer');
+            container.innerHTML = '';
+            const titles = ['Scene 1 • Hook', 'Scene 2 • Shlok / Wisdom', 'Scene 3 • Soulful Meaning', 'Scene 4 • Practical Action', 'Scene 5 • Outro & Blessing'];
+
+            scenes.forEach((sc, idx) => {
+                const card = document.createElement('div');
+                card.className = 'p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between text-slate-400">
+                        <span class="font-semibold text-amber-400">${titles[idx] || `Scene ${idx+1}`}</span>
+                        <span>~${sc.duration_seconds || 8}s</span>
+                    </div>
+                    <textarea class="scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-amber-500/50" rows="2">${sc.spoken_hindi || sc.spoken_english || sc.spoken_text}</textarea>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function gatherEditedScenes() {
+            const textareas = document.querySelectorAll('#scenesContainer textarea.scene-text');
+            const scenes = [];
+            textareas.forEach((ta, idx) => {
+                scenes.push({
+                    scene_number: idx + 1,
+                    duration_seconds: idx === 0 ? 7 : idx === 4 ? 6 : 8,
+                    spoken_hindi: ta.value.trim(),
+                    visual_description: '',
+                    bgm_mood: 'peaceful'
+                });
+            });
+            return scenes;
+        }
+
+        async function triggerRender() {
+            const renderBtn = document.getElementById('renderBtn');
+            const progress = document.getElementById('renderProgress');
+            const progressBar = document.getElementById('progressBar');
+            const progressStep = document.getElementById('progressStep');
+            const progressTimer = document.getElementById('progressTimer');
+
+            renderBtn.disabled = true;
+            progress.classList.remove('hidden');
+
+            const scenes = gatherEditedScenes();
+            const draftText = document.getElementById('draftInput').value.trim();
+
+            let startTime = performance.now();
+            timerInterval = setInterval(() => {
+                const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+                progressTimer.innerText = `${elapsed}s`;
+            }, 100);
+
+            progressStep.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-amber-400"></i> Synthesizing audio & visuals...';
+            progressBar.style.width = '35%';
+
+            try {
+                setTimeout(() => {
+                    progressStep.innerHTML = '<i class="fa-solid fa-bolt text-amber-400"></i> Executing Single-Pass FFmpeg Render...';
+                    progressBar.style.width = '75%';
+                }, 1400);
+
+                const res = await fetch(`/api/${channelSlug}/render`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        draft_text: draftText,
+                        scenes: scenes
+                    })
+                });
+
+                if (!res.ok) throw new Error('Render failed');
+                const result = await res.json();
+
+                progressBar.style.width = '100%';
+                progressStep.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i> Render Complete!';
+
+                lastRenderedVideoId = result.video_id;
+                playVideo(result.stream_url, result.title || result.filename, result.duration_seconds, result.video_id);
+                loadHistory();
+
+            } catch (err) {
+                alert('Render failed: ' + err.message);
+            } finally {
+                clearInterval(timerInterval);
+                renderBtn.disabled = false;
+                setTimeout(() => { progress.classList.add('hidden'); }, 3000);
+            }
+        }
+
+        function playVideo(url, title, duration, videoId) {
+            const player = document.getElementById('videoPlayer');
+            const placeholder = document.getElementById('noVideoPlaceholder');
+            const metaTitle = document.getElementById('metaTitle');
+            const metaDetails = document.getElementById('metaDetails');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const statusBadge = document.getElementById('videoStatusBadge');
+
+            if (videoId) lastRenderedVideoId = videoId;
+            placeholder.classList.add('hidden');
+            player.src = url;
+            player.play();
+
+            metaTitle.innerText = title || 'Rendered Video';
+            metaDetails.innerText = `${duration || '38.0'}s • 1080x1920 HD`;
+            downloadBtn.href = url;
+            statusBadge.innerText = 'Active';
+            statusBadge.className = 'text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300';
+        }
+
+        async function schedulePost() {
+            const timeVal = document.getElementById('scheduleTime').value;
+            const alertBox = document.getElementById('scheduleAlert');
+            if (!timeVal) {
+                alert('Please select a target publishing time.');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/${channelSlug}/schedule`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        video_id: lastRenderedVideoId,
+                        scheduled_time: timeVal,
+                        platforms: ['youtube', 'instagram']
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Scheduling failed');
+
+                alertBox.classList.remove('hidden');
+                alertBox.innerText = `✓ Successfully scheduled for ${new Date(timeVal).toLocaleString()}`;
+                loadHistory();
+                setTimeout(() => { alertBox.classList.add('hidden'); }, 4000);
+            } catch (err) {
+                alert('Schedule error: ' + err.message);
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const res = await fetch(`/api/${channelSlug}/history`);
+                const data = await res.json();
+                const container = document.getElementById('historyList');
+                container.innerHTML = '';
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<div class="p-4 text-center text-slate-500 text-xs">No videos recorded in database yet.</div>';
+                    return;
+                }
+                data.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'p-2.5 rounded-lg bg-dark-850 border border-slate-800 flex items-center justify-between hover:border-slate-700 transition';
+
+                    let statusBadge = '';
+                    if (item.status === 'scheduled') {
+                        const timeStr = item.scheduled_time ? item.scheduled_time.replace('T', ' ') : '';
+                        statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">⏳ ${timeStr ? timeStr.slice(5, 16) : 'Scheduled'}</span>`;
+                    } else if (item.status === 'published') {
+                        statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">✓ Published</span>`;
+                    } else {
+                        statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-semibold bg-slate-800 text-slate-400">Rendered</span>`;
+                    }
+
+                    let extLinks = '';
+                    if (item.youtube_url) {
+                        extLinks += `<a href="${item.youtube_url}" target="_blank" class="text-red-400 hover:text-red-300 ml-1" title="View YouTube Short"><i class="fa-brands fa-youtube"></i></a>`;
+                    }
+                    if (item.reel_url) {
+                        extLinks += `<a href="${item.reel_url}" target="_blank" class="text-pink-400 hover:text-pink-300 ml-1" title="View Instagram Reel"><i class="fa-brands fa-instagram"></i></a>`;
+                    }
+
+                    row.innerHTML = `
+                        <div class="truncate max-w-[160px]">
+                            <div class="font-medium text-slate-200 truncate">${item.title || 'Generated Video'}</div>
+                            <div class="text-[10px] text-slate-500 font-mono">${item.duration}s • ${item.created_at ? item.created_at.slice(0, 16) : ''}</div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            ${statusBadge}
+                            ${extLinks}
+                            <button onclick="playVideo('${item.stream_url}', '${item.title}', '${item.duration}', '${item.id}')" class="text-amber-400 hover:text-amber-300 p-1">
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            } catch (e) {}
+        }
+
+        async function publishToYouTube() {
+            const btn = document.getElementById('ytPublishBtn');
+            const alertBox = document.getElementById('youtubeAlert');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading to YouTube...';
+            alertBox.classList.add('hidden');
+
+            try {
+                const res = await fetch(`/api/${channelSlug}/publish-youtube`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        video_id: lastRenderedVideoId ? parseInt(lastRenderedVideoId) : null,
+                        privacy_status: 'public'
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.detail || 'YouTube upload failed');
+                }
+
+                alertBox.classList.remove('hidden');
+                alertBox.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="font-bold">✓ Published to YouTube Shorts!</span>
+                            <div class="text-[11px] text-slate-300 mt-0.5">Video ID: ${data.youtube_video_id}</div>
+                        </div>
+                        <a href="${data.shorts_url}" target="_blank" class="px-2.5 py-1 rounded bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition flex items-center gap-1">
+                            <i class="fa-brands fa-youtube"></i> View Short
+                        </a>
+                    </div>
+                `;
+                loadHistory();
+            } catch (err) {
+                alertBox.classList.remove('hidden');
+                alertBox.className = 'p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs';
+                alertBox.innerHTML = `<span><i class="fa-solid fa-triangle-exclamation mr-1"></i> ${err.message}</span>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-brands fa-youtube"></i> YouTube';
+            }
+        }
+
+        async function publishToInstagram() {
+            const btn = document.getElementById('igPublishBtn');
+            const alertBox = document.getElementById('instagramAlert');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading Reel...';
+            alertBox.classList.add('hidden');
+
+            try {
+                const res = await fetch(`/api/${channelSlug}/publish-instagram`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        video_id: lastRenderedVideoId ? parseInt(lastRenderedVideoId) : null
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.detail || 'Instagram publish failed');
+                }
+
+                alertBox.classList.remove('hidden');
+                alertBox.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="font-bold">✓ Published to Instagram Reels!</span>
+                            <div class="text-[11px] text-slate-300 mt-0.5">Media ID: ${data.instagram_media_id}</div>
+                        </div>
+                        <a href="${data.reel_url}" target="_blank" class="px-2.5 py-1 rounded bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold text-xs transition flex items-center gap-1">
+                            <i class="fa-brands fa-instagram"></i> View Reel
+                        </a>
+                    </div>
+                `;
+                loadHistory();
+            } catch (err) {
+                alertBox.classList.remove('hidden');
+                alertBox.className = 'p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs';
+                alertBox.innerHTML = `<span><i class="fa-solid fa-triangle-exclamation mr-1"></i> ${err.message}</span>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-brands fa-instagram"></i> Instagram';
+            }
+        }
+
+        async function handleLogout() {
+            await fetch(`/api/${channelSlug}/logout`, { method: 'POST' });
+            window.location.href = `/login?channel=${channelSlug}`;
+        }
+
+        // Check for YouTube & Instagram OAuth return query params
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('youtube_connected') === 'true') {
+            const alertBox = document.getElementById('youtubeAlert');
+            if (alertBox) {
+                alertBox.classList.remove('hidden');
+                alertBox.className = 'p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs';
+                alertBox.innerHTML = '<span><i class="fa-solid fa-circle-check mr-1"></i> YouTube Channel successfully connected!</span>';
+            }
+        } else if (urlParams.get('youtube_error')) {
+            const alertBox = document.getElementById('youtubeAlert');
+            if (alertBox) {
+                alertBox.classList.remove('hidden');
+                alertBox.className = 'p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs';
+                alertBox.innerHTML = `<span><i class="fa-solid fa-triangle-exclamation mr-1"></i> YouTube Auth Error: ${urlParams.get('youtube_error')}</span>`;
+            }
+        }
+
+        if (urlParams.get('instagram_connected') === 'true') {
+            const alertBox = document.getElementById('instagramAlert');
+            if (alertBox) {
+                alertBox.classList.remove('hidden');
+                alertBox.className = 'p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs';
+                alertBox.innerHTML = '<span><i class="fa-solid fa-circle-check mr-1"></i> Instagram Business Account successfully connected!</span>';
+            }
+        } else if (urlParams.get('instagram_error')) {
+            const alertBox = document.getElementById('instagramAlert');
+            if (alertBox) {
+                alertBox.classList.remove('hidden');
+                alertBox.className = 'p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs';
+                alertBox.innerHTML = `<span><i class="fa-solid fa-triangle-exclamation mr-1"></i> Instagram Auth Error: ${urlParams.get('instagram_error')}</span>`;
+            }
+        }
+
+        // Set default schedule time to tomorrow 7:00 PM
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(19, 0, 0, 0);
+        document.getElementById('scheduleTime').value = tomorrow.toISOString().slice(0, 16);
+
+        // Auto-refresh history table every 7 seconds to catch background scheduler updates
+        setInterval(loadHistory, 7000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidStack AI | Automated Vertical Video Cloud</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f5f3ff', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9', 900: '#4c1d95' },
+                        dark: { 800: '#13151f', 850: '#0e1018', 900: '#090a0f' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass-card {
+            background: rgba(19, 21, 31, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-brand-600 selection:text-white">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800/80 bg-dark-850/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/30">
+                    <i class="fa-solid fa-wand-magic-sparkles text-white text-lg"></i>
+                </div>
+                <div>
+                    <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">VidStack AI</span>
+                    <span class="text-xs px-2 py-0.5 ml-2 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30 font-mono">v2.4 SinglePass</span>
+                </div>
+            </div>
+            <nav class="flex items-center gap-4">
+                <a href="/geetaverse" class="text-sm font-medium text-slate-300 hover:text-white transition px-3 py-1.5 rounded-lg hover:bg-slate-800/60">
+                    <i class="fa-solid fa-om text-amber-400 mr-1.5"></i> Geetaverse Studio
+                </a>
+                <a href="/gtachronicles" class="text-sm font-medium text-slate-300 hover:text-white transition px-3 py-1.5 rounded-lg hover:bg-slate-800/60">
+                    <i class="fa-solid fa-gamepad text-emerald-400 mr-1.5"></i> GTA Chronicles
+                </a>
+                <a href="/core_access" class="text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg border border-slate-700 transition flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-brand-400"></i> Core Access
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <main class="flex-1 max-w-7xl mx-auto px-6 py-12 w-full">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-6">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Hardware-Accelerated Python Pipeline • Single-Pass FFmpeg
+            </div>
+            <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight mb-6">
+                Automated Vertical Video <span class="bg-gradient-to-r from-brand-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">Content Engine</span>
+            </h1>
+            <p class="text-lg text-slate-400 leading-relaxed">
+                Transform operator thoughts into high-retention 9:16 YouTube Shorts and Instagram Reels in under 10 seconds with zero manual video editing.
+            </p>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-14">
+            <div class="glass-card rounded-2xl p-5">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Active Portals</span>
+                    <i class="fa-solid fa-cubes text-brand-400"></i>
+                </div>
+                <div class="text-3xl font-bold text-white">{{ channels|length }}</div>
+                <div class="text-xs text-emerald-400 mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-check"></i> Multi-Tenant Ready
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-5">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Render Engine</span>
+                    <i class="fa-solid fa-bolt text-amber-400"></i>
+                </div>
+                <div class="text-3xl font-bold text-white">&lt; 8.8s</div>
+                <div class="text-xs text-slate-400 mt-2">Single-pass FFmpeg x264</div>
+            </div>
+            <div class="glass-card rounded-2xl p-5">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Aspect Ratio</span>
+                    <i class="fa-solid fa-mobile-screen text-indigo-400"></i>
+                </div>
+                <div class="text-3xl font-bold text-white">9:16 HD</div>
+                <div class="text-xs text-slate-400 mt-2">1080x1920 • 30 FPS</div>
+            </div>
+            <div class="glass-card rounded-2xl p-5">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>System Status</span>
+                    <i class="fa-solid fa-circle-nodes text-emerald-400"></i>
+                </div>
+                <div class="text-3xl font-bold text-emerald-400">Operational</div>
+                <div class="text-xs text-slate-400 mt-2">Edge-TTS & Groq Online</div>
+            </div>
+        </div>
+
+        <!-- Channels Grid -->
+        <div class="mb-14">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white tracking-tight">Active Multi-Tenant Portals</h2>
+                    <p class="text-sm text-slate-400">Launch a dedicated operator studio with isolated pipeline & social publishing keys.</p>
+                </div>
+                <a href="/core_access" class="text-xs px-3 py-1.5 rounded-xl bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 border border-brand-500/30 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus text-xs"></i> Provision Channel
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for ch in channels %}
+                <div class="glass-card rounded-2xl p-7 transition duration-300 relative overflow-hidden group flex flex-col justify-between">
+                    <div class="absolute -right-8 -top-8 w-36 h-36 {% if ch.slug == 'geetaverse' %}bg-amber-500/10{% elif ch.slug == 'gtachronicles' %}bg-emerald-500/10{% else %}bg-indigo-500/10{% endif %} rounded-full blur-2xl group-hover:opacity-100 opacity-60 transition"></div>
+                    
+                    <div>
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 rounded-xl {% if ch.slug == 'geetaverse' %}bg-amber-500/20 text-amber-400 border border-amber-500/30{% elif ch.slug == 'gtachronicles' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}bg-indigo-500/20 text-indigo-400 border border-indigo-500/30{% endif %} flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-{{ 'om' if ch.slug == 'geetaverse' else ('gamepad' if 'gaming' in ch.niche.lower() or ch.slug == 'gtachronicles' else 'film') }}"></i>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                LIVE STUDIO
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">{{ ch.name }}</h3>
+                        <p class="text-sm text-slate-400 mb-6 leading-relaxed">
+                            {% if ch.slug == 'geetaverse' %}
+                            Transforms operator notes or Bhagavad Gita wisdom into Little Krishna devotional vertical shorts with Devanagari subtitles.
+                            {% elif ch.slug == 'gtachronicles' %}
+                            Generates fast-paced GTA V myth-busting, ramp jump stunts, subway heists, and Los Santos character lore shorts in Hindi.
+                            {% else %}
+                            Automated vertical video pipeline for {{ ch.niche }} with single-pass FFmpeg rendering and instant social dispatch.
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div>
+                        <div class="flex flex-wrap gap-2 mb-6 text-xs text-slate-400">
+                            <span class="px-2.5 py-1 rounded-lg bg-dark-850 border border-slate-800 font-mono">/{{ ch.slug }}</span>
+                            <span class="px-2.5 py-1 rounded-lg bg-dark-850 border border-slate-800">{{ ch.niche }}</span>
+                            <span class="px-2.5 py-1 rounded-lg bg-dark-850 border border-slate-800">5-Scene Fast Render</span>
+                        </div>
+                        <a href="/{{ ch.slug }}" class="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl {% if ch.slug == 'geetaverse' %}bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-amber-500/20{% elif ch.slug == 'gtachronicles' %}bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-emerald-500/20{% else %}bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-500 hover:to-brand-500 shadow-brand-500/20{% endif %} text-white text-sm font-semibold transition shadow-lg">
+                            Launch Studio <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Architecture & Technology Breakdown -->
+        <div class="glass-card rounded-2xl p-8 mb-14 border border-slate-800">
+            <div class="text-center max-w-2xl mx-auto mb-8">
+                <h2 class="text-2xl font-bold text-white tracking-tight">Enterprise Autonomous Pipeline</h2>
+                <p class="text-xs text-slate-400 mt-1">Modular Python automation stack built for speed, determinism, and zero maintenance</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+                <div class="p-4 rounded-xl bg-dark-850 border border-slate-800 space-y-2">
+                    <div class="flex items-center gap-2 text-brand-400 font-bold text-sm">
+                        <i class="fa-solid fa-brain text-base"></i> Groq LLaMA 3.3 70B NLP
+                    </div>
+                    <p class="text-slate-400">Refines unstructured notes into structured 5-scene JSON scripts with hook, setup, climax, reveal, and CTA.</p>
+                </div>
+                <div class="p-4 rounded-xl bg-dark-850 border border-slate-800 space-y-2">
+                    <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                        <i class="fa-solid fa-bolt text-base"></i> Single-Pass FFmpeg
+                    </div>
+                    <p class="text-slate-400">Renders 1080x1920 30FPS vertical video with zoom motion & Devanagari burned captions in under 8 seconds.</p>
+                </div>
+                <div class="p-4 rounded-xl bg-dark-850 border border-slate-800 space-y-2">
+                    <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                        <i class="fa-solid fa-cloud-arrow-up text-base"></i> Auto-Social Scheduler
+                    </div>
+                    <p class="text-slate-400">Autonomous background loop auto-dispatches mature videos to YouTube Shorts & Instagram Reels via Meta Graph.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Showcase / Recent Renders -->
+        {% if recent_videos %}
+        <div>
+            <h2 class="text-2xl font-bold text-white tracking-tight mb-6">Recent Render Showcase</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for video in recent_videos %}
+                <div class="glass-card rounded-2xl overflow-hidden p-4">
+                    <div class="relative bg-black rounded-xl overflow-hidden mb-3 aspect-[9/16] max-h-96 flex items-center justify-center">
+                        <video src="{{ video.stream_url }}" controls preload="metadata" class="w-full h-full object-contain"></video>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                        <span class="font-medium text-slate-200 truncate max-w-[180px]">{{ video.filename }}</span>
+                        <span class="text-brand-400 font-mono">{{ video.duration_seconds }}s</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-500">{{ video.file_size_mb }} MB</span>
+                        <a href="{{ video.stream_url }}" download class="text-brand-400 hover:text-brand-300 font-medium">
+                            <i class="fa-solid fa-download mr-1"></i> Download
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 bg-dark-850 py-6 text-center text-xs text-slate-500 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>VidStack AI Engine • Fast, deterministic Python automation</div>
+            <div class="flex gap-4">
+                <a href="/core_access" class="hover:text-slate-400 transition">Core Access</a>
+                <a href="/docs" class="hover:text-slate-400 transition">API Documentation</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

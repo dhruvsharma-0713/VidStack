@@ -1,41 +1,79 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# C extensions
+*.so
 
-# testing
-/coverage
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# next.js
-/.next/
-/out/
+# PyInstaller
+*.manifest
+*.spec
 
-# production
-/build
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
 
-# misc
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environments and Secrets
+.env
+.env.*
+!.env.example
+!.env.local.example
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Project-specific / Engine outputs & local caches
+engine/output/
+engine/data/visual_cache/
+engine/data/audio_assets/
+engine/data/gta_footage/
+*.log
+temp/
+tmp/
+*.db
+*.sqlite
+*.sqlite3
+vidstack.db
+
+# OS / Editor files
 .DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+Thumbs.db
+.vscode/
+.idea/

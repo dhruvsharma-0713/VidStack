@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTA Chronicles Studio | Operator Workspace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gta: { 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857' },
+                        dark: { 800: '#13151f', 850: '#0e1018', 900: '#090a0f' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass-panel {
+            background: rgba(19, 21, 31, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(14, 16, 24, 0.6);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(16, 185, 129, 0.3);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-emerald-600 selection:text-white">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800/80 bg-dark-850/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="/" class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white text-lg">
+                    <i class="fa-solid fa-gamepad"></i>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-lg text-white">GTA Chronicles</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium">Los Santos Lore</span>
+                    </div>
+                    <span class="text-xs text-slate-400">Gameplay Scripting & Vertical Shorts Automation</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/geetaverse" class="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-om text-amber-400 mr-1"></i> Geetaverse Studio
+                </a>
+                <a href="/core_access" class="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-shield-halved text-brand-400 mr-1"></i> Core Access
+                </a>
+                <span class="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> GTA Engine Ready
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Workspace -->
+    <main class="flex-1 max-w-7xl mx-auto px-6 py-8 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left: Mission & Script Builder (7 Cols) -->
+        <section class="lg:col-span-7 space-y-6">
+            
+            <!-- Mission Input Card -->
+            <div class="glass-panel rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <label class="text-sm font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-crosshairs text-emerald-400"></i> Mission / Heist Notes & Lore Concepts
+                    </label>
+                    <span class="text-xs text-slate-400">English / Narration Script</span>
+                </div>
+
+                <textarea id="gtaDraftInput" rows="3" class="w-full bg-dark-850 border border-slate-800 rounded-xl p-4 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/60 transition" placeholder="e.g. The crazy Union Depository secret tunnel escape that almost nobody noticed in GTA V..."></textarea>
+                
+                <!-- Quick Story Presets -->
+                <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                    <span class="text-slate-500 font-medium mr-1">Mission Presets:</span>
+                    <button onclick="setGtaTheme('The Union Depository secret heist escape glitch')" class="px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-slate-800 border border-slate-800 text-slate-300 transition hover:border-emerald-500/40">
+                        💰 Union Depository Heist
+                    </button>
+                    <button onclick="setGtaTheme('Trevor Philips craziest rampage in Sandy Shores lore')" class="px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-slate-800 border border-slate-800 text-slate-300 transition hover:border-emerald-500/40">
+                        🚁 Trevor's Airfield Mystery
+                    </button>
+                    <button onclick="setGtaTheme('Franklin supercar 5 star police chase across Vinewood hills')" class="px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-slate-800 border border-slate-800 text-slate-300 transition hover:border-emerald-500/40">
+                        🚨 5-Star Vinewood Pursuit
+                    </button>
+                </div>
+
+                <!-- Controls -->
+                <div class="mt-5 flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-xs text-slate-400">
+                        <span>Voice:</span>
+                        <select id="voiceSelect" class="bg-dark-850 border border-slate-800 rounded-lg px-2 py-1 text-slate-200 text-xs">
+                            <option value="en-US-ChristopherNeural">Christopher (Narrative)</option>
+                            <option value="en-US-GuyNeural">Guy (Energetic)</option>
+                            <option value="en-US-EricNeural">Eric (Action)</option>
+                        </select>
+                    </div>
+                    <button id="gtaRefineBtn" onclick="refineGtaDraft()" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm transition flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generate GTA Script
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scene Breakdown -->
+            <div class="glass-panel rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-film text-emerald-400"></i> 5-Scene Story Timeline
+                        </h3>
+                        <p class="text-xs text-slate-400">High-retention GTA storytelling • Hook to Climax</p>
+                    </div>
+                    <span class="text-xs font-mono px-2.5 py-1 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">
+                        ~45s Target
+                    </span>
+                </div>
+
+                <div id="gtaScenesContainer" class="space-y-3 max-h-[460px] overflow-y-auto pr-1 custom-scrollbar">
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-emerald-400">Scene 1 • High-Stakes Hook</span>
+                            <span>~8s</span>
+                        </div>
+                        <textarea class="gta-scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-emerald-500/50" rows="2">Did you know there is a secret escape tunnel beneath Los Santos that guaranteed a 100% clean getaway in GTA V?</textarea>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-emerald-400">Scene 2 • The Setup & Crew</span>
+                            <span>~9s</span>
+                        </div>
+                        <textarea class="gta-scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-emerald-500/50" rows="2">During the Big Score heist, Michael and Trevor discovered an abandoned subway duct right beneath the bank vault.</textarea>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-emerald-400">Scene 3 • High Speed Chase & Climax</span>
+                            <span>~10s</span>
+                        </div>
+                        <textarea class="gta-scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-emerald-500/50" rows="2">With 5 stars lighting up the map, diving into this tunnel instantly breaks the police chopper line of sight!</textarea>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-emerald-400">Scene 4 • The Escape & Score</span>
+                            <span>~10s</span>
+                        </div>
+                        <textarea class="gta-scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-emerald-500/50" rows="2">Two hundred million dollars secured, and the FIB didn't even know what hit them.</textarea>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-emerald-400">Scene 5 • CTA & Punchline</span>
+                            <span>~8s</span>
+                        </div>
+                        <textarea class="gta-scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-emerald-500/50" rows="2">Drop a like if you still play GTA V in 2026, and subscribe for more hidden Los Santos secrets!</textarea>
+                    </div>
+                </div>
+
+                <!-- Render CTA -->
+                <div class="mt-5 pt-4 border-t border-slate-800/80 flex items-center justify-between">
+                    <div>
+                        <div class="text-xs font-semibold text-slate-300">Fast Single-Pass Pipeline</div>
+                        <div class="text-[11px] text-slate-500">Hardware-Optimized FFmpeg • 1080x1920</div>
+                    </div>
+                    <button id="gtaRenderBtn" onclick="triggerGtaRender()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm transition flex items-center gap-2 shadow-xl shadow-emerald-500/25">
+                        <i class="fa-solid fa-play"></i> 1-Click Render Short
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right: Player & Export (5 Cols) -->
+        <section class="lg:col-span-5 space-y-6">
+            <div class="glass-panel rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-clapperboard text-emerald-400"></i> Video Preview
+                    </h3>
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                        GTA 9:16
+                    </span>
+                </div>
+
+                <div class="relative bg-black rounded-xl overflow-hidden aspect-[9/16] max-h-[480px] mx-auto flex items-center justify-center border border-slate-800">
+                    <video id="gtaVideoPlayer" src="{{ latest_video.stream_url if latest_video else '' }}" controls preload="metadata" class="w-full h-full object-contain"></video>
+                </div>
+
+                <div class="mt-4 p-3.5 rounded-xl bg-dark-850 border border-slate-800 flex items-center justify-between text-xs">
+                    <div>
+                        <div class="font-medium text-slate-200">GTA Chronicles Short #1</div>
+                        <div class="text-slate-500">1080x1920 • 30 FPS • H.264</div>
+                    </div>
+                    <a href="{{ latest_video.stream_url if latest_video else '#' }}" download class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-medium transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> Download
+                    </a>
+                </div>
+            </div>
+
+            <!-- YouTube Shorts Metadata Generator -->
+            <div class="glass-panel rounded-2xl p-6">
+                <h3 class="text-base font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fa-brands fa-youtube text-red-500"></i> YouTube & TikTok SEO
+                </h3>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Generated Title</label>
+                        <input type="text" value="The SECRET Escape Route Nobody Uses in GTA 5! #shorts #gtav" class="w-full bg-dark-850 border border-slate-800 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Hashtags</label>
+                        <input type="text" value="#GTA5 #GTAV #GamingShorts #GrandTheftAuto #GTAChronicles" class="w-full bg-dark-850 border border-slate-800 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        function setGtaTheme(theme) {
+            document.getElementById('gtaDraftInput').value = theme;
+            refineGtaDraft();
+        }
+
+        async function refineGtaDraft() {
+            const draft = document.getElementById('gtaDraftInput').value.trim();
+            if (!draft) return;
+            const btn = document.getElementById('gtaRefineBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generating...';
+
+            try {
+                const res = await fetch('/api/gtachronicles/refine-draft', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ draft_text: draft })
+                });
+                if (!res.ok) throw new Error('Refinement failed');
+                const data = await res.json();
+                
+                const container = document.getElementById('gtaScenesContainer');
+                container.innerHTML = '';
+                const titles = ['Scene 1 • High-Stakes Hook', 'Scene 2 • The Setup & Crew', 'Scene 3 • Chase & Climax', 'Scene 4 • The Escape & Score', 'Scene 5 • CTA & Punchline'];
+                
+                data.scenes.forEach((sc, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'p-3.5 rounded-xl bg-dark-850 border border-slate-800 text-xs space-y-2';
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between text-slate-400">
+                            <span class="font-semibold text-emerald-400">${titles[idx] || `Scene ${idx+1}`}</span>
+                            <span>~${sc.duration_seconds || 9}s</span>
+                        </div>
+                        <textarea class="gta-scene-text w-full bg-dark-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 text-xs focus:outline-none focus:border-emerald-500/50" rows="2">${sc.spoken_hindi || sc.spoken_english || sc.spoken_text}</textarea>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                alert('GTA script generation: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Generate GTA Script';
+            }
+        }
+
+        async function triggerGtaRender() {
+            const btn = document.getElementById('gtaRenderBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Rendering...';
+            try {
+                const res = await fetch('/api/gtachronicles/generate-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ draft_text: document.getElementById('gtaDraftInput').value.trim() })
+                });
+                if (!res.ok) throw new Error('Render failed');
+                const data = await res.json();
+                const player = document.getElementById('gtaVideoPlayer');
+                player.src = data.stream_url;
+                player.play();
+            } catch (err) {
+                alert('Render error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-play"></i> 1-Click Render Short';
+            }
+        }
+    </script>
+</body>
+</html>

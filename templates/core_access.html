@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Access | VidStack Superuser Telemetry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9' },
+                        dark: { 800: '#13151f', 850: '#0e1018', 900: '#090a0f' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass-panel {
+            background: rgba(19, 21, 31, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-brand-600 selection:text-white">
+
+    <!-- Top Navigation -->
+    <header class="border-b border-slate-800/80 bg-dark-850/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="/" class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/20 text-white text-lg">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-lg text-white">VidStack Core Access</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 font-mono">SUPERUSER</span>
+                    </div>
+                    <span class="text-xs text-slate-400">Multi-Tenant Telemetry & SQLite Database Queue</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/geetaverse" class="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-om text-amber-400 mr-1"></i> Geetaverse Studio
+                </a>
+                <a href="/gtachronicles" class="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-gamepad text-emerald-400 mr-1"></i> GTA Studio
+                </a>
+                <button onclick="handleSuperuserLogout()" class="text-xs text-red-400 hover:text-red-300 px-3 py-1.5 rounded-lg border border-red-500/20 hover:bg-red-500/10 transition">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl mx-auto px-6 py-8 w-full space-y-8">
+        
+        <!-- Telemetry Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass-panel rounded-2xl p-5">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Registered Portals</span>
+                    <i class="fa-solid fa-server text-brand-400"></i>
+                </div>
+                <div class="text-3xl font-bold text-white">{{ channels|length }}</div>
+                <div class="text-xs text-slate-400 mt-2">Active Multi-Tenant Studios</div>
+            </div>
+            <div class="glass-panel rounded-2xl p-5">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Database Videos</span>
+                    <i class="fa-solid fa-database text-emerald-400"></i>
+                </div>
+                <div class="text-3xl font-bold text-white">{{ all_videos|length }}</div>
+                <div class="text-xs text-slate-400 mt-2">SQLite `vidstack.db`</div>
+            </div>
+            <div class="glass-panel rounded-2xl p-5">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Avg Render Latency</span>
+                    <i class="fa-solid fa-gauge-high text-amber-400"></i>
+                </div>
+                <div class="text-3xl font-bold text-white">&lt; 8.8s</div>
+                <div class="text-xs text-emerald-400 mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-check"></i> Single-Pass FFmpeg
+                </div>
+            </div>
+            <div class="glass-panel rounded-2xl p-5">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Storage Used</span>
+                    <i class="fa-solid fa-hard-drive text-indigo-400"></i>
+                </div>
+                <div class="text-3xl font-bold text-white">{{ total_storage_mb }} MB</div>
+                <div class="text-xs text-slate-400 mt-2">`engine/output/`</div>
+            </div>
+        </div>
+
+        <!-- Multi-Tenant Channel Management -->
+        <div class="glass-panel rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-lg font-bold text-white tracking-tight">Active Tenant Portals (SQLite `channels`)</h2>
+                    <p class="text-xs text-slate-400">Registered multi-channel video creation engines and security passkeys</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="openProvisionModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-brand-500/20 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus text-xs"></i> Provision New Portal
+                    </button>
+                    <span class="text-xs px-2.5 py-1 rounded-lg bg-dark-850 border border-slate-800 text-slate-300 font-mono hidden sm:inline">
+                        SQLite Database Backed
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for ch in channels %}
+                <div class="p-4 rounded-xl bg-dark-850 border border-slate-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-{{ 'om' if ch.slug == 'geetaverse' else 'gamepad' }}"></i>
+                            </div>
+                            <div>
+                                <span class="font-bold text-sm text-white">{{ ch.name }}</span>
+                                <span class="text-xs text-slate-500 font-mono ml-1.5">/{{ ch.slug }}</span>
+                            </div>
+                        </div>
+                        <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            ONLINE
+                        </span>
+                    </div>
+
+                    <div class="text-xs text-slate-400">
+                        Niche: <span class="text-slate-200">{{ ch.niche }}</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400 pt-1 border-t border-slate-800/60">
+                        <div>Passkey: <code class="text-amber-400 bg-dark-900 px-1.5 py-0.5 rounded border border-slate-800">{{ ch.passkey }}</code></div>
+                        <div>Created: <span class="text-slate-200">{{ ch.created_at[:10] if ch.created_at else '2026-08-20' }}</span></div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2">
+                        <a href="/{{ ch.slug }}" class="text-xs font-semibold text-brand-400 hover:text-brand-300 transition flex items-center gap-1">
+                            Launch Studio <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                        <div class="flex items-center gap-1.5">
+                            {% if ch.youtube_token %}
+                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                                <i class="fa-brands fa-youtube text-red-500"></i> YT
+                            </span>
+                            {% else %}
+                            <a href="/api/auth/youtube/login?channel={{ ch.slug }}" class="text-[11px] px-2 py-0.5 rounded bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30 transition flex items-center gap-1">
+                                <i class="fa-brands fa-youtube text-red-400"></i> +YT
+                            </a>
+                            {% endif %}
+
+                            {% if ch.instagram_token %}
+                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                                <i class="fa-brands fa-instagram text-pink-500"></i> IG
+                            </span>
+                            {% else %}
+                            <a href="/api/auth/instagram/login?channel={{ ch.slug }}" class="text-[11px] px-2 py-0.5 rounded bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30 transition flex items-center gap-1">
+                                <i class="fa-brands fa-instagram text-pink-400"></i> +IG
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Global Video Database Table -->
+        <div class="glass-panel rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-lg font-bold text-white tracking-tight">Global Video Records (SQLite `videos`)</h2>
+                    <p class="text-xs text-slate-400">Complete multi-channel rendering & scheduling queue</p>
+                </div>
+                <button onclick="window.location.reload()" class="text-xs px-3 py-1.5 rounded-lg bg-dark-850 hover:bg-slate-800 border border-slate-800 text-slate-300 transition">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Refresh Table
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
+                            <th class="pb-3">ID</th>
+                            <th class="pb-3">Channel</th>
+                            <th class="pb-3">Title</th>
+                            <th class="pb-3">Status</th>
+                            <th class="pb-3">Duration</th>
+                            <th class="pb-3">Scheduled Time</th>
+                            <th class="pb-3">Created</th>
+                            <th class="pb-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60">
+                        {% for video in all_videos %}
+                        <tr class="hover:bg-slate-800/30 transition">
+                            <td class="py-3 font-mono text-slate-500">#{{ video.id }}</td>
+                            <td class="py-3 font-medium text-brand-400">{{ video.channel_slug }}</td>
+                            <td class="py-3 text-slate-200 truncate max-w-[200px]">{{ video.title or 'Generated Video' }}</td>
+                            <td class="py-3">
+                                <span class="px-2 py-0.5 rounded text-[10px] uppercase font-semibold
+                                    {% if video.status == 'scheduled' %}bg-amber-500/20 text-amber-300 border border-amber-500/30
+                                    {% elif video.status == 'published' %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30
+                                    {% else %}bg-slate-800 text-slate-400{% endif %}">
+                                    {{ video.status }}
+                                </span>
+                            </td>
+                            <td class="py-3 font-mono text-amber-400">{{ video.duration }}s</td>
+                            <td class="py-3 text-slate-400">{{ video.scheduled_time or '-' }}</td>
+                            <td class="py-3 text-slate-500 text-[10px]">{{ video.created_at[:16] if video.created_at else '-' }}</td>
+                            <td class="py-3 text-right space-x-2">
+                                <a href="{{ video.stream_url }}" target="_blank" class="text-brand-400 hover:text-brand-300 font-medium">
+                                    <i class="fa-solid fa-play mr-1"></i> Stream
+                                </a>
+                                <a href="{{ video.stream_url }}" download class="text-slate-400 hover:text-white font-medium">
+                                    <i class="fa-solid fa-download mr-1"></i> Download
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="py-6 text-center text-slate-500">
+                                No video records in SQLite database yet.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Provision New Channel Modal -->
+    <div id="provisionModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-lg rounded-2xl p-6 border border-slate-800 space-y-5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Provision New Channel Portal</h3>
+                        <p class="text-xs text-slate-400">Instantly generate a dedicated pipeline and web studio</p>
+                    </div>
+                </div>
+                <button onclick="closeProvisionModal()" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="provisionForm" onsubmit="handleProvisionSubmit(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Portal Name</label>
+                        <input type="text" id="provName" required placeholder="e.g. SciVerse Hindi" class="w-full px-3 py-2 rounded-xl bg-dark-900 border border-slate-800 text-white text-xs focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">URL Slug</label>
+                        <input type="text" id="provSlug" required placeholder="e.g. sciverse" class="w-full px-3 py-2 rounded-xl bg-dark-900 border border-slate-800 text-white text-xs font-mono focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Channel Passkey</label>
+                        <input type="password" id="provPasskey" required placeholder="e.g. sci123" class="w-full px-3 py-2 rounded-xl bg-dark-900 border border-slate-800 text-white text-xs focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Niche Category</label>
+                        <input type="text" id="provNiche" required placeholder="e.g. Science / Tech" class="w-full px-3 py-2 rounded-xl bg-dark-900 border border-slate-800 text-white text-xs focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Pipeline Engine</label>
+                        <select id="provEngine" class="w-full px-3 py-2 rounded-xl bg-dark-900 border border-slate-800 text-white text-xs focus:outline-none focus:border-brand-500">
+                            <option value="gameplay_broll">Gameplay & Action B-Roll</option>
+                            <option value="gita_vedic">Vedic / Spiritual Wisdom</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Voiceover Neural Voice</label>
+                        <select id="provVoice" class="w-full px-3 py-2 rounded-xl bg-dark-900 border border-slate-800 text-white text-xs focus:outline-none focus:border-brand-500">
+                            <option value="hi-IN-MadhurNeural">Hindi (Madhur Neural - Male)</option>
+                            <option value="hi-IN-SwaraNeural">Hindi (Swara Neural - Female)</option>
+                            <option value="en-US-ChristopherNeural">English (Christopher Neural)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="provError" class="p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs hidden"></div>
+
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeProvisionModal()" class="px-4 py-2 rounded-xl bg-dark-850 hover:bg-slate-800 text-slate-300 text-xs font-semibold transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="provSubmitBtn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-brand-500/20 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt"></i> Provision Channel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 bg-dark-850 py-6 text-center text-xs text-slate-500 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>VidStack Superuser Telemetry • SQLite `vidstack.db`</div>
+            <div>FastAPI + Jinja2 + Single-Pass FFmpeg</div>
+        </div>
+    </footer>
+
+    <script>
+        function openProvisionModal() {
+            document.getElementById('provisionModal').classList.remove('hidden');
+            document.getElementById('provError').classList.add('hidden');
+        }
+
+        function closeProvisionModal() {
+            document.getElementById('provisionModal').classList.add('hidden');
+        }
+
+        async function handleProvisionSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('provSubmitBtn');
+            const errBox = document.getElementById('provError');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Provisioning...';
+            errBox.classList.add('hidden');
+
+            const payload = {
+                name: document.getElementById('provName').value,
+                slug: document.getElementById('provSlug').value,
+                passkey: document.getElementById('provPasskey').value,
+                niche: document.getElementById('provNiche').value,
+                engine_type: document.getElementById('provEngine').value,
+                voice_id: document.getElementById('provVoice').value
+            };
+
+            try {
+                const res = await fetch('/api/channels/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.detail || 'Provisioning failed');
+                }
+                window.location.reload();
+            } catch (err) {
+                errBox.classList.remove('hidden');
+                errBox.innerText = err.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Provision Channel';
+            }
+        }
+
+        async function handleSuperuserLogout() {
+            await fetch('/api/core_access/logout', { method: 'POST' });
+            window.location.href = '/login?channel=core_access';
+        }
+    </script>
+</body>
+</html>
