@@ -64,11 +64,6 @@ except Exception as e:
 # Base and template directories resolution
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = BASE_DIR / "templates"
-if not TEMPLATES_DIR.exists():
-    TEMPLATES_DIR = Path.cwd() / "templates"
-if not TEMPLATES_DIR.exists():
-    TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
-
 OUTPUT_DIR = Path("/tmp/engine_output") if os.getenv("VERCEL") else BASE_DIR / "engine" / "output"
 
 try:
