@@ -1,7 +1,8 @@
 import os
 import sys
+from pathlib import Path
 
-# Add root directory to sys.path so relative and package imports work in Vercel serverless environment
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT_DIR))
 
 from app import app

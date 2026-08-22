@@ -59,20 +59,30 @@ from engine.scheduler import scheduler
 init_db()
 
 # Base directories
-BASE_DIR = Path(__file__).parent
-OUTPUT_DIR = BASE_DIR / "engine" / "output"
+BASE_DIR = Path(__file__).resolve().parent
+OUTPUT_DIR = Path("/tmp/engine_output") if os.getenv("VERCEL") else BASE_DIR / "engine" / "output"
 TEMPLATES_DIR = BASE_DIR / "templates"
 
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-TEMPLATES_DIR.mkdir(parents=True, exist_ok=True)
+try:
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
+
+try:
+    TEMPLATES_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """FastAPI Lifespan Context Manager: Starts background scheduler on startup and shuts down gracefully."""
-    scheduler.start()
+    # Only run background loop if not in short-lived serverless lambda environment
+    if not os.getenv("VERCEL"):
+        scheduler.start()
     yield
-    scheduler.stop()
+    if not os.getenv("VERCEL"):
+        scheduler.stop()
 
 
 # FastAPI Application
@@ -95,7 +105,7 @@ app.add_middleware(
 # Mount static video output directory
 app.mount("/static/output", StaticFiles(directory=str(OUTPUT_DIR)), name="output")
 
-# Jinja2 Templates Engine
+# Jinja2 Templates Engine (resolves to absolute templates directory)
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 

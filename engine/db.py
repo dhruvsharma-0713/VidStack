@@ -1,10 +1,14 @@
 import json
+import os
 import sqlite3
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# Database path in workspace root
-DB_PATH = Path(__file__).parent.parent / "vidstack.db"
+# Database path: /tmp/vidstack.db in Vercel serverless or local vidstack.db in workspace root
+if os.getenv("VERCEL"):
+    DB_PATH = Path("/tmp/vidstack.db")
+else:
+    DB_PATH = Path(__file__).resolve().parent.parent / "vidstack.db"
 
 
 def get_connection() -> sqlite3.Connection:
